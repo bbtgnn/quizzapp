@@ -1,0 +1,22 @@
+{
+  "active_plan": "/Users/giovanniabbatepaolo/Documents/GitHub/quizzapp/.sisyphus/plans/classroom-quiz-app.md",
+  "started_at": "2026-04-03T10:21:22.510Z",
+  "session_ids": [
+    "ses_2ad4430f5ffedwNveo4qo23Qf3",
+    "ses_2ad2275b3ffeT7unHKAslXZPVh",
+    "ses_2ad1e8892ffeVTD97GZ5fbbP3W",
+    "ses_2ad190c0bffe52iqVXoJZ1Yt6z",
+    "ses_2ad14bd14ffe6moHvatEP7xg1n",
+    "ses_2ad10c950ffeKV3VHmriD45KIF",
+    "ses_2ad0a732fffetFIyW0zWqrpodL",
+    "ses_2acff3251ffeL7o3idq5imYAdF",
+    "ses_2acf9e94fffewIDrxd5cQ5a1EE",
+    "ses_2acf77758ffeTeFR6eC6BTQIbS",
+    "ses_2acf36c41ffecTRLy1RS0ECwzN",
+    "ses_2acf0e743ffeOUpUgvKYtSXcqd",
+    "ses_2acec25beffe5RXMnmKaaKYtqu"
+  ],
+  "plan_name": "classroom-quiz-app",
+  "agent": "atlas",
+  "task_sessions": {}
+}

@@ -13,7 +13,10 @@ const config = {
 			return isExternalLibrary ? undefined : true;
 		}
 	},
-	kit: { adapter: adapter() }
+	kit: {
+		adapter: adapter({ fallback: 'index.html' }),
+		prerender: { handleUnseenRoutes: 'ignore' }
+	}
 };
 
 export default config;
