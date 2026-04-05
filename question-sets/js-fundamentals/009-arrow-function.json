@@ -1,0 +1,29 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const multiply = (x, y) => {\n  return x * y;\n};\n\nconst square = (n) => n * n;",
+		"highlight": { "startLine": 1, "endLine": 5 }
+	},
+	"questions": [
+		{
+			"text": "What kind of functions are these?",
+			"correctAnswer": "Arrow functions",
+			"difficulty": "easy"
+		},
+		{
+			"text": "How many arguments does multiply take?",
+			"correctAnswer": "2",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What does square(4) return?",
+			"correctAnswer": "16",
+			"difficulty": "easy"
+		},
+		{
+			"text": "Why does square not have curly braces or a return keyword?",
+			"correctAnswer": "Arrow functions with a single expression can omit the curly braces and the return keyword. The expression is implicitly returned.",
+			"difficulty": "medium"
+		}
+	]
+}

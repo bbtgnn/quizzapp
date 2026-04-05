@@ -1,0 +1,38 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const student = {\n  name: \"Alice\",\n  age: 22,\n  enrolled: true\n};",
+		"highlight": { "startLine": 1, "endLine": 5 }
+	},
+	"questions": [
+		{
+			"text": "What is student?",
+			"correctAnswer": "An object",
+			"difficulty": "easy"
+		},
+		{
+			"text": "How many properties does this object have?",
+			"correctAnswer": "3 (name, age, enrolled)",
+			"difficulty": "easy",
+			"chain": [
+				{
+					"text": "Name all three properties.",
+					"correctAnswer": "name, age, enrolled"
+				},
+				{
+					"text": "What is the data type of the age property?",
+					"correctAnswer": "number"
+				},
+				{
+					"text": "What is the data type of the enrolled property?",
+					"correctAnswer": "boolean"
+				}
+			]
+		},
+		{
+			"text": "How do you access the name property?",
+			"correctAnswer": "student.name (dot notation) or student[\"name\"] (bracket notation)",
+			"difficulty": "easy"
+		}
+	]
+}

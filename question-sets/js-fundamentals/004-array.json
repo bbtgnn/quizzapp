@@ -1,0 +1,29 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);",
+		"highlight": { "startLine": 1, "endLine": 1 }
+	},
+	"questions": [
+		{
+			"text": "What is colors?",
+			"correctAnswer": "An array",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What does colors[0] return?",
+			"correctAnswer": "\"red\"",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What does colors.length return?",
+			"correctAnswer": "3",
+			"difficulty": "easy"
+		},
+		{
+			"text": "If you run typeof colors, what do you get?",
+			"correctAnswer": "\"object\" — arrays are technically objects in JavaScript",
+			"difficulty": "medium"
+		}
+	]
+}

@@ -1,0 +1,34 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "function add(a, b) {\n  return a + b;\n}\n\nconst result = add(5, 3);",
+		"highlight": { "startLine": 1, "endLine": 1 }
+	},
+	"questions": [
+		{
+			"text": "How many arguments does the function add take?",
+			"correctAnswer": "2",
+			"difficulty": "easy",
+			"chain": [
+				{
+					"text": "What is the name of the first argument?",
+					"correctAnswer": "a"
+				},
+				{
+					"text": "What is the name of the second argument?",
+					"correctAnswer": "b"
+				}
+			]
+		},
+		{
+			"text": "What does add(5, 3) return?",
+			"correctAnswer": "8",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What is the difference between a parameter and an argument?",
+			"correctAnswer": "Parameters are the variable names in the function definition (a, b). Arguments are the actual values passed when calling the function (5, 3).",
+			"difficulty": "medium"
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};",
+		"highlight": { "startLine": 3, "endLine": 5 }
+	},
+	"questions": [
+		{
+			"text": "What is add in this code?",
+			"correctAnswer": "A method — a function that is a property of an object",
+			"difficulty": "medium"
+		},
+		{
+			"text": "What does this refer to inside the add method?",
+			"correctAnswer": "The calculator object",
+			"difficulty": "medium"
+		},
+		{
+			"text": "How many arguments does the add method take?",
+			"correctAnswer": "1 (n)",
+			"difficulty": "easy"
+		},
+		{
+			"text": "How many arguments does the reset method take?",
+			"correctAnswer": "0",
+			"difficulty": "easy"
+		}
+	]
+}

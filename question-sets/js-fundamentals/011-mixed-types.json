@@ -1,0 +1,37 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const data = {\n  id: 42,\n  label: \"score\",\n  values: [10, 20, 30],\n  active: false,\n  metadata: null\n};",
+		"highlight": { "startLine": 1, "endLine": 7 }
+	},
+	"questions": [
+		{
+			"text": "What is the data type of data.id?",
+			"correctAnswer": "number",
+			"difficulty": "easy",
+			"chain": [
+				{
+					"text": "What is the data type of data.label?",
+					"correctAnswer": "string"
+				},
+				{
+					"text": "What is the data type of data.values?",
+					"correctAnswer": "array (of numbers)"
+				},
+				{
+					"text": "What is the data type of data.active?",
+					"correctAnswer": "boolean"
+				},
+				{
+					"text": "What is the data type of data.metadata?",
+					"correctAnswer": "null"
+				}
+			]
+		},
+		{
+			"text": "How many properties does data have?",
+			"correctAnswer": "5 (id, label, values, active, metadata)",
+			"difficulty": "easy"
+		}
+	]
+}

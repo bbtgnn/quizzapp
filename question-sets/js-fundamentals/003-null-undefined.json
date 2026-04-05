@@ -1,0 +1,24 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "let username = null;\nlet age;\nconsole.log(username);\nconsole.log(age);",
+		"highlight": { "startLine": 1, "endLine": 2 }
+	},
+	"questions": [
+		{
+			"text": "What is the data type of username?",
+			"correctAnswer": "null (object if using typeof, but the value is null)",
+			"difficulty": "medium"
+		},
+		{
+			"text": "What is the data type of age?",
+			"correctAnswer": "undefined",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What is the difference between null and undefined?",
+			"correctAnswer": "null is an intentional absence of value (set by the programmer). undefined means the variable was declared but never assigned a value.",
+			"difficulty": "medium"
+		}
+	]
+}

@@ -1,0 +1,32 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "console.log(typeof 42);\nconsole.log(typeof \"hello\");\nconsole.log(typeof true);\nconsole.log(typeof undefined);\nconsole.log(typeof null);\nconsole.log(typeof [1, 2]);\nconsole.log(typeof { a: 1 });",
+		"highlight": { "startLine": 1, "endLine": 7 }
+	},
+	"questions": [
+		{
+			"text": "What does typeof 42 return?",
+			"correctAnswer": "\"number\"",
+			"difficulty": "easy",
+			"chain": [
+				{
+					"text": "What does typeof \"hello\" return?",
+					"correctAnswer": "\"string\""
+				},
+				{
+					"text": "What does typeof true return?",
+					"correctAnswer": "\"boolean\""
+				},
+				{
+					"text": "What does typeof undefined return?",
+					"correctAnswer": "\"undefined\""
+				},
+				{
+					"text": "What does typeof null return? (this is a trick question)",
+					"correctAnswer": "\"object\" — this is a known JavaScript bug that was never fixed"
+				}
+			]
+		}
+	]
+}

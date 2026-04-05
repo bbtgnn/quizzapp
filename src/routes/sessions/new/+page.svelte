@@ -74,7 +74,7 @@
 		try {
 			const session = await createSession({
 				classroom_id: selectedClassroomId,
-				question_set_ids: selectedQuestionSetIds,
+				question_set_ids: $state.snapshot(selectedQuestionSetIds),
 				n_questions_per_student: nQuestionsPerStudent,
 				strategy_id: 'default'
 			});

@@ -1,0 +1,29 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;",
+		"highlight": { "startLine": 1, "endLine": 1 }
+	},
+	"questions": [
+		{
+			"text": "What is the data type of price?",
+			"correctAnswer": "number",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What is the data type of quantity?",
+			"correctAnswer": "number",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What is the data type of inStock?",
+			"correctAnswer": "boolean",
+			"difficulty": "easy"
+		},
+		{
+			"text": "In JavaScript, are 9.99 and 3 the same data type?",
+			"correctAnswer": "Yes, both are number. JavaScript does not distinguish between integers and floats.",
+			"difficulty": "medium"
+		}
+	]
+}

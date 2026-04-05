@@ -14,8 +14,9 @@
 	import type { Question, Snippet } from '$lib/db/types.js';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
 
-	let engine = $state<SessionEngine | null>(null);
+	let engine = $state.raw<SessionEngine | null>(null);
 	let tick = $state(0);
+	let recording = $state(false);
 	let snippetMap = new Map<string, Snippet>();
 
 	onMount(async () => {
@@ -47,16 +48,38 @@
 		}
 
 		const attempts = await listAttemptsBySession(sessionId);
+
+		const rootQs = allQuestions.filter((q) => q.chain_parent_id === null);
+		console.log('[ENGINE INIT]', {
+			totalQuestions: allQuestions.length,
+			rootQuestions: rootQs.length,
+			students: students.length,
+			sessionStudents: sessionStudents.length,
+			questionSetIds: session.question_set_ids,
+			sampleQuestion: allQuestions[0],
+			sampleChainParentIds: allQuestions.slice(0, 5).map((q) => ({
+				text: q.text.slice(0, 40),
+				chain_parent_id: q.chain_parent_id,
+				typeofChainParent: typeof q.chain_parent_id
+			}))
+		});
+
 		engine = new SessionEngine(session, sessionStudents, students, allQuestions, attempts);
 	});
 
 	async function recordOutcome(outcome: 'correct' | 'partial' | 'wrong') {
-		await engine?.recordOutcome(outcome);
-		tick++;
+		if (!engine || recording) return;
+		recording = true;
+		try {
+			await engine.recordOutcome(outcome);
+			tick++;
+		} finally {
+			recording = false;
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (!engine || engine.isComplete) return;
+		if (!engine || engine.isComplete || recording) return;
 		if (e.key === '1' || e.key === 'c' || e.key === 'C') {
 			recordOutcome('correct');
 		} else if (e.key === '2' || e.key === 'p' || e.key === 'P') {

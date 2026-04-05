@@ -1,0 +1,29 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "function describe(person) {\n  return person.name + \" is \" + person.age + \" years old.\";\n}\n\nconst output = describe({ name: \"Eve\", age: 30 });",
+		"highlight": { "startLine": 5, "endLine": 5 }
+	},
+	"questions": [
+		{
+			"text": "How many arguments does describe take?",
+			"correctAnswer": "1 (person)",
+			"difficulty": "easy",
+			"chain": [
+				{
+					"text": "What is the data type of that argument?",
+					"correctAnswer": "An object"
+				},
+				{
+					"text": "What properties does the object passed to describe have?",
+					"correctAnswer": "name and age"
+				}
+			]
+		},
+		{
+			"text": "What does describe({ name: \"Eve\", age: 30 }) return?",
+			"correctAnswer": "\"Eve is 30 years old.\"",
+			"difficulty": "easy"
+		}
+	]
+}

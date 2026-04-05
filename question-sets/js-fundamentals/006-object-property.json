@@ -1,0 +1,24 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const car = {\n  brand: \"Toyota\",\n  year: 2020,\n  colors: [\"white\", \"black\"]\n};\n\nconsole.log(car.brand);\nconsole.log(car.colors[1]);",
+		"highlight": { "startLine": 4, "endLine": 4 }
+	},
+	"questions": [
+		{
+			"text": "What is the data type of the highlighted property (colors)?",
+			"correctAnswer": "An array (of strings)",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What does car.colors[1] return?",
+			"correctAnswer": "\"black\"",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What is a property?",
+			"correctAnswer": "A property is a key-value pair that belongs to an object. The key is the name (e.g. brand), the value is the data (e.g. \"Toyota\").",
+			"difficulty": "easy"
+		}
+	]
+}

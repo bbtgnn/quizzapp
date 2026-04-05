@@ -1,0 +1,19 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "const greeting = \"Hello, world!\";",
+		"highlight": { "startLine": 1, "endLine": 1 }
+	},
+	"questions": [
+		{
+			"text": "What is the data type of greeting?",
+			"correctAnswer": "string",
+			"difficulty": "easy"
+		},
+		{
+			"text": "What keyword is used to declare this variable?",
+			"correctAnswer": "const",
+			"difficulty": "easy"
+		}
+	]
+}

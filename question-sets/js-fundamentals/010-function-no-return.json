@@ -1,0 +1,19 @@
+{
+	"snippet": {
+		"language": "javascript",
+		"code": "function logMessage(text) {\n  console.log(text);\n}\n\nconst result = logMessage(\"hi\");",
+		"highlight": { "startLine": 5, "endLine": 5 }
+	},
+	"questions": [
+		{
+			"text": "What is the value of result?",
+			"correctAnswer": "undefined — the function does not have a return statement, so it returns undefined by default",
+			"difficulty": "medium"
+		},
+		{
+			"text": "Does this function have a return statement?",
+			"correctAnswer": "No",
+			"difficulty": "easy"
+		}
+	]
+}

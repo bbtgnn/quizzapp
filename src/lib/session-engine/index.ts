@@ -30,6 +30,7 @@ export class SessionEngine {
 	private _chainQuestions: Question[] = [];
 	private _chainIndex: number = 0;
 	private _chainOutcomes: Array<'correct' | 'partial' | 'wrong'> = [];
+	private _askedThisSession: Set<string> = new Set();
 
 	constructor(
 		session: Session,
@@ -201,11 +202,18 @@ export class SessionEngine {
 		const student = this.currentStudent;
 		if (!student || this._questions.length === 0) return null;
 
-		const rootQuestions = this._questions.filter((q) => q.chain_parent_id === null);
-		if (rootQuestions.length === 0) return null;
+		const allRootQuestions = this._questions.filter((q) => q.chain_parent_id === null);
+		if (allRootQuestions.length === 0) return null;
+
+		const rootQuestions = allRootQuestions.filter((q) => !this._askedThisSession.has(q.id));
+		if (rootQuestions.length === 0) {
+			this._askedThisSession.clear();
+			return this._pickQuestion();
+		}
 
 		const selector = getQuestionStrategy(this._session.strategy_id);
 		const rootQ = selector.pick(student, this._attempts, rootQuestions);
+		this._askedThisSession.add(rootQ.id);
 
 		const children = this._questions
 			.filter((q) => q.chain_parent_id === rootQ.id)
