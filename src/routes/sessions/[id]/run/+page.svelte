@@ -11,13 +11,16 @@
 		listQuestionsBySnippet,
 		listAttemptsBySession
 	} from '$lib/db/index.js';
-	import type { Question, Snippet } from '$lib/db/types.js';
+	import type { Question, Snippet, Student } from '$lib/db/types.js';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
 
 	let engine = $state.raw<SessionEngine | null>(null);
 	let tick = $state(0);
 	let recording = $state(false);
 	let snippetMap = new Map<string, Snippet>();
+	/** Student id after their transition was dismissed (questions visible). */
+	let lastSettledStudentId = $state<string | null>(null);
+	let pendingTransitionStudent = $state<Student | null>(null);
 
 	onMount(async () => {
 		const sessionId = page.params.id;
@@ -49,21 +52,6 @@
 
 		const attempts = await listAttemptsBySession(sessionId);
 
-		const rootQs = allQuestions.filter((q) => q.chain_parent_id === null);
-		console.log('[ENGINE INIT]', {
-			totalQuestions: allQuestions.length,
-			rootQuestions: rootQs.length,
-			students: students.length,
-			sessionStudents: sessionStudents.length,
-			questionSetIds: session.question_set_ids,
-			sampleQuestion: allQuestions[0],
-			sampleChainParentIds: allQuestions.slice(0, 5).map((q) => ({
-				text: q.text.slice(0, 40),
-				chain_parent_id: q.chain_parent_id,
-				typeofChainParent: typeof q.chain_parent_id
-			}))
-		});
-
 		engine = new SessionEngine(session, sessionStudents, students, allQuestions, attempts);
 	});
 
@@ -79,6 +67,13 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
+		if (pendingTransitionStudent) {
+			if (e.key === ' ' || e.key === 'Enter') {
+				e.preventDefault();
+				dismissPlayerTransition();
+			}
+			return;
+		}
 		if (!engine || engine.isComplete || recording) return;
 		if (e.key === '1' || e.key === 'c' || e.key === 'C') {
 			recordOutcome('correct');
@@ -95,6 +90,27 @@
 			goto('/sessions');
 		}
 	}
+
+	function dismissPlayerTransition() {
+		const p = pendingTransitionStudent;
+		if (p) {
+			lastSettledStudentId = p.id;
+			pendingTransitionStudent = null;
+		}
+	}
+
+	$effect(() => {
+		if (!engine || engine.isComplete) return;
+		tick;
+		const cs = engine.currentStudent;
+		if (!cs) return;
+		// Already showing transition for this student
+		if (pendingTransitionStudent?.id === cs.id) return;
+		// User dismissed transition; main UI is for this student
+		if (lastSettledStudentId === cs.id) return;
+		// First player or handoff to next player — same screen
+		pendingTransitionStudent = cs;
+	});
 
 	let currentStudent = $derived(tick >= 0 ? engine?.currentStudent : null);
 	let currentQuestion = $derived(tick >= 0 ? engine?.currentQuestion : null);
@@ -121,6 +137,32 @@
 			>
 				Back to Sessions
 			</a>
+		</div>
+	{:else if pendingTransitionStudent}
+		<div
+			class="flex min-h-screen flex-1 flex-col items-center justify-center bg-gray-950 p-8 text-center"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="next-player-label"
+		>
+			<div class="max-w-lg space-y-6">
+				<p id="next-player-label" class="text-xl text-gray-400">next player:</p>
+				<p class="text-5xl font-bold text-white md:text-6xl">
+					<strong>{pendingTransitionStudent.name}</strong>
+				</p>
+				<p class="text-2xl font-semibold text-amber-300">get ready!</p>
+				<button
+					type="button"
+					onclick={dismissPlayerTransition}
+					class="mt-4 rounded-lg bg-blue-600 px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+				>
+					Continue
+				</button>
+				<p class="text-sm text-gray-500">
+					Press <kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">Space</kbd> or
+					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">Enter</kbd>
+				</p>
+			</div>
 		</div>
 	{:else if currentStudent && currentQuestion}
 		<div class="flex flex-1 flex-col p-8">
