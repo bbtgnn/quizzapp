@@ -1,43 +1,26 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { listClassrooms, listStudentsByClassroom, deleteClassroom } from '$lib/db/index.js';
-	import type { Classroom } from '$lib/db/types.js';
+	import { invalidateAll } from '$app/navigation';
+	import { deleteClassroom } from '$lib/db/index.js';
+	import type { PageProps } from './$types';
 
-	type ClassroomWithCount = Classroom & { studentCount: number };
+	let { data }: PageProps = $props();
 
-	let classrooms = $state<ClassroomWithCount[]>([]);
-	let loading = $state(true);
-
-	async function loadClassrooms() {
-		loading = true;
-		try {
-			const dbClassrooms = await listClassrooms();
-			const withCounts = await Promise.all(
-				dbClassrooms.map(async (c) => {
-					const students = await listStudentsByClassroom(c.id);
-					return { ...c, studentCount: students.length };
-				})
-			);
-			classrooms = withCounts.sort((a, b) => b.created_at - a.created_at);
-		} catch (e) {
-			console.error('Failed to load classrooms:', e);
-		} finally {
-			loading = false;
-		}
-	}
-
-	onMount(() => {
-		loadClassrooms();
-	});
+	let deletingId = $state<string | null>(null);
 
 	async function handleDelete(id: string) {
 		if (
-			confirm(
+			!confirm(
 				'Are you sure you want to delete this classroom? All students and their data will be lost.'
 			)
 		) {
+			return;
+		}
+		deletingId = id;
+		try {
 			await deleteClassroom(id);
-			await loadClassrooms();
+			await invalidateAll();
+		} finally {
+			deletingId = null;
 		}
 	}
 </script>
@@ -79,13 +62,7 @@
 		</div>
 	</div>
 
-	{#if loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-			></div>
-		</div>
-	{:else if classrooms.length === 0}
+	{#if data.classrooms.length === 0}
 		<div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
 			<h3 class="mt-2 text-sm font-semibold text-gray-900">No classrooms</h3>
 			<p class="mt-1 text-sm text-gray-500">Get started by creating a new classroom.</p>
@@ -110,7 +87,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-			{#each classrooms as classroom (classroom.id)}
+			{#each data.classrooms as classroom (classroom.id)}
 				<div
 					class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
 				>
@@ -130,9 +107,10 @@
 						</a>
 						<button
 							onclick={() => handleDelete(classroom.id)}
-							class="text-sm font-medium text-red-600 hover:text-red-800"
+							disabled={deletingId === classroom.id}
+							class="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
 						>
-							Delete
+							{deletingId === classroom.id ? 'Deleting…' : 'Delete'}
 						</button>
 					</div>
 				</div>
