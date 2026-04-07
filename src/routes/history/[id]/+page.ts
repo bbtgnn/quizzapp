@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import {
 	getSession,
 	listAttemptsBySession,
@@ -11,7 +10,7 @@ import type { Attempt, Question, Student } from '$lib/db/types.js';
 export type AttemptWithDetails = Attempt & { questionText: string };
 export type StudentWithAttempts = Student & { attempts: AttemptWithDetails[] };
 
-export const load: PageLoad = async ({ params }) => {
+export const load = async ({ params }) => {
 	const sessionId = params.id;
 	if (!sessionId) throw error(404, { message: 'Session not found' });
 

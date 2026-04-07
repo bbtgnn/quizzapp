@@ -1,8 +1,7 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import { getClassroom, listStudentsByClassroom } from '$lib/db/index.js';
 
-export const load: PageLoad = async ({ params }) => {
+export const load = async ({ params }) => {
 	const id = params.id;
 	if (!id) throw error(404, { message: 'Classroom not found' });
 

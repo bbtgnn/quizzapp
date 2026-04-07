@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import { listSessions, getClassroom, listAttemptsBySession } from '$lib/db/index.js';
 import type { Session } from '$lib/db/types.js';
 
@@ -9,7 +8,7 @@ export type SessionWithDetails = Session & {
 	attemptCount: number;
 };
 
-export const load: PageLoad = async () => {
+export const load = async () => {
 	try {
 		const allSessions = await listSessions();
 		const completedSessions = allSessions.filter((s) => s.status === 'completed');

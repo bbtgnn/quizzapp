@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
+	let { data } = $props();
 </script>
 
 <div class="mx-auto max-w-4xl p-6">

@@ -3,9 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { updateClassroom, createStudent, deleteStudent, deleteClassroom } from '$lib/db/index.js';
 	import type { Classroom, Student } from '$lib/db/types.js';
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	let classroom = $state<Classroom | null>(null);
 	let students = $state<Student[]>([]);

@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import {
 	getSession,
 	listSessionStudents,
@@ -10,7 +9,7 @@ import {
 } from '$lib/db/index.js';
 import type { Question, Snippet } from '$lib/db/types.js';
 
-export const load: PageLoad = async ({ params }) => {
+export const load = async ({ params }) => {
 	const sessionId = params.id;
 	if (!sessionId) throw error(404, { message: 'Session not found' });
 

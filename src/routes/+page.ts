@@ -1,8 +1,7 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import { loadClassroomsIndex } from '$lib/data/loaders/classrooms-index.js';
 
-export const load: PageLoad = async () => {
+export const load = async () => {
 	try {
 		return await loadClassroomsIndex();
 	} catch (e) {

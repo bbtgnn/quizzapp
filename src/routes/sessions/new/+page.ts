@@ -1,7 +1,6 @@
-import type { PageLoad } from './$types';
 import { listClassrooms, listQuestionSets } from '$lib/db/index.js';
 
-export const load: PageLoad = async () => {
+export const load = async () => {
 	try {
 		const [dbClassrooms, dbQuestionSets] = await Promise.all([
 			listClassrooms(),

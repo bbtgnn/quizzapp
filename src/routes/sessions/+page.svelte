@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	function formatDate(timestamp: number) {
 		return new Date(timestamp).toLocaleDateString(undefined, {

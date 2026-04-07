@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 import {
 	listQuestionSets,
 	listSnippetsByQuestionSet,
@@ -9,7 +8,7 @@ import type { QuestionSet } from '$lib/db/types.js';
 
 export type QuestionSetWithCounts = QuestionSet & { snippetCount: number; questionCount: number };
 
-export const load: PageLoad = async () => {
+export const load = async () => {
 	try {
 		const dbQuestionSets = await listQuestionSets();
 		const withCounts: QuestionSetWithCounts[] = await Promise.all(

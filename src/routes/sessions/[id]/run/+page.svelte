@@ -3,10 +3,9 @@
 	import { resolve } from '$app/paths';
 	import { SessionEngine } from '$lib/session-engine/index.js';
 	import type { Snippet, Student } from '$lib/db/types.js';
-	import type { PageProps } from './$types';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
 
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	let engine = $state.raw<SessionEngine | null>(null);
 	let tick = $state(0);

@@ -2,9 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { createSession, listStudentsByClassroom, createSessionStudent } from '$lib/db/index.js';
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	let selectedClassroomId = $state('');
 	let selectedQuestionSetIds = $state<string[]>([]);

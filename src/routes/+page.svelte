@@ -2,9 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { deleteClassroom } from '$lib/db/index.js';
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	let deletingId = $state<string | null>(null);
 
