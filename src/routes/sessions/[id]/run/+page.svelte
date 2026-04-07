@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { SessionEngine } from '$lib/domain/session-engine/index.js';
 	import { sessionEnginePersistence } from '$lib/app/index.js';
-	import type { Snippet, Student } from '$lib/model/types.js';
+	import type { Student, CodeSnippetContent } from '$lib/model/types.js';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
 
 	let { data } = $props();
@@ -11,13 +11,11 @@
 	let engine = $state.raw<SessionEngine | null>(null);
 	let tick = $state(0);
 	let recording = $state(false);
-	let snippetMap = $state(new Map<string, Snippet>());
 	/** Student id after their transition was dismissed (questions visible). */
 	let lastSettledStudentId = $state<string | null>(null);
 	let pendingTransitionStudent = $state<Student | null>(null);
 
 	$effect(() => {
-		snippetMap = new Map(Object.entries(data.snippetByQuestionId));
 		engine = new SessionEngine(
 			data.session,
 			data.sessionStudents,
@@ -93,7 +91,7 @@
 	let isComplete = $derived(tick >= 0 ? (engine?.isComplete ?? false) : false);
 	let progress = $derived(tick >= 0 ? engine?.progress : null);
 	let chainProgress = $derived(tick >= 0 ? engine?.chainProgress : null);
-	let currentSnippet = $derived(currentQuestion ? snippetMap.get(currentQuestion.id) : null);
+	let currentContent = $derived(currentQuestion?.content);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -170,12 +168,12 @@
 					<h2 class="text-2xl font-medium text-gray-100">{currentQuestion.text}</h2>
 				</div>
 
-				{#if currentSnippet && currentSnippet.code}
+				{#if currentContent && currentContent.type === 'code-snippet'}
 					<div class="rounded-xl bg-gray-800 p-6 shadow-lg">
 						<CodeBlock
-							code={currentSnippet.code}
-							language={currentSnippet.language}
-							highlight={currentSnippet.highlight}
+							code={currentContent.code}
+							language={currentContent.language}
+							highlight={currentContent.highlight}
 						/>
 					</div>
 				{/if}

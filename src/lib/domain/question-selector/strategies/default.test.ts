@@ -10,9 +10,10 @@ const makeStudent = (id = 's1'): Student => ({
 
 const makeQuestion = (id: string): Question => ({
 	id,
-	snippet_id: 'snip1',
+	question_set_id: 'qs1',
 	text: `Question ${id}`,
-	correct_answer: 'answer',
+	content: { type: 'code-snippet', language: 'ts', code: 'x' },
+	answer: { type: 'open' },
 	chain_parent_id: null,
 	chain_order: 0
 });

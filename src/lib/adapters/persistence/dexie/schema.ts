@@ -6,7 +6,6 @@ import type {
 	QuestionSet,
 	Session,
 	SessionStudent,
-	Snippet,
 	Student
 } from '$lib/model/types.js';
 
@@ -14,7 +13,6 @@ class QuizAppDB extends Dexie {
 	classrooms!: EntityTable<Classroom, 'id'>;
 	students!: EntityTable<Student, 'id'>;
 	questionSets!: EntityTable<QuestionSet, 'id'>;
-	snippets!: EntityTable<Snippet, 'id'>;
 	questions!: EntityTable<Question, 'id'>;
 	sessions!: EntityTable<Session, 'id'>;
 	sessionStudents!: EntityTable<SessionStudent, 'id'>;
@@ -33,6 +31,16 @@ class QuizAppDB extends Dexie {
 			sessionStudents: 'id, session_id, student_id, [session_id+student_id]',
 			attempts: 'id, session_id, student_id, question_id, answered_at'
 		});
+
+		this.version(2)
+			.stores({
+				snippets: null,
+				questions: 'id, question_set_id, chain_parent_id'
+			})
+			.upgrade((_tx) => {
+				// Clean break (D002): no data migration. Dexie deletes the snippets table
+				// and re-indexes questions. Old data is lost on upgrade.
+			});
 	}
 }
 

@@ -18,4 +18,4 @@ export {
 	type ImportBackupResult
 } from './backup.js';
 export { listSessionsOrderedByStartedAt } from '$lib/application/sessions/sessions.service.js';
-export { persistSnippetFileUnderQuestionSet } from '$lib/application/question-sets/persist-snippet-file.js';
+export { persistQuestionSet } from '$lib/application/question-sets/persist-question-set.js';

@@ -9,7 +9,7 @@
 	async function handleDelete(id: string) {
 		if (
 			!confirm(
-				'Are you sure you want to delete this question set? All snippets and questions will be lost.'
+				'Are you sure you want to delete this question set? All questions will be lost.'
 			)
 		) {
 			return;
@@ -72,8 +72,6 @@
 					<div>
 						<h3 class="text-lg font-semibold text-gray-900">{qs.name}</h3>
 						<p class="mt-1 text-sm text-gray-500">
-							{qs.snippetCount}
-							{qs.snippetCount === 1 ? 'snippet' : 'snippets'} &middot;
 							{qs.questionCount}
 							{qs.questionCount === 1 ? 'question' : 'questions'}
 						</p>

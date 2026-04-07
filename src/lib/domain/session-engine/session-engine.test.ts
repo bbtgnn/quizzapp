@@ -5,17 +5,19 @@ import type { Attempt, Question, Session, SessionStudent, Student } from '$lib/m
 const makeStudent = (id: string): Student => ({ id, classroom_id: 'c1', name: `Student ${id}` });
 const makeQuestion = (id: string): Question => ({
 	id,
-	snippet_id: 'snip1',
+	question_set_id: 'qs1',
 	text: `Q ${id}`,
-	correct_answer: 'a',
+	content: { type: 'code-snippet', language: 'ts', code: 'x' },
+	answer: { type: 'open' },
 	chain_parent_id: null,
 	chain_order: 0
 });
 const makeChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
 	id,
-	snippet_id: 'snip1',
+	question_set_id: 'qs1',
 	text: `Q ${id}`,
-	correct_answer: 'a',
+	content: { type: 'code-snippet', language: 'ts', code: 'x' },
+	answer: { type: 'open' },
 	chain_parent_id: parentId,
 	chain_order: order
 });

@@ -1,11 +1,12 @@
 import { db } from './schema.js';
 
+// TODO S03: bump backup version to 2 and handle new question format
+
 export async function exportFullBackup(): Promise<void> {
 	const [
 		classrooms,
 		students,
 		questionSets,
-		snippets,
 		questions,
 		sessions,
 		sessionStudents,
@@ -14,7 +15,6 @@ export async function exportFullBackup(): Promise<void> {
 		db.classrooms.toArray(),
 		db.students.toArray(),
 		db.questionSets.toArray(),
-		db.snippets.toArray(),
 		db.questions.toArray(),
 		db.sessions.toArray(),
 		db.sessionStudents.toArray(),
@@ -27,7 +27,6 @@ export async function exportFullBackup(): Promise<void> {
 		classrooms,
 		students,
 		questionSets,
-		snippets,
 		questions,
 		sessions,
 		sessionStudents,
@@ -80,7 +79,6 @@ export async function importFullBackupFromFile(file: File): Promise<ImportBackup
 				db.classrooms,
 				db.students,
 				db.questionSets,
-				db.snippets,
 				db.questions,
 				db.sessions,
 				db.sessionStudents,
@@ -90,7 +88,6 @@ export async function importFullBackupFromFile(file: File): Promise<ImportBackup
 				await db.classrooms.clear();
 				await db.students.clear();
 				await db.questionSets.clear();
-				await db.snippets.clear();
 				await db.questions.clear();
 				await db.sessions.clear();
 				await db.sessionStudents.clear();
@@ -106,10 +103,10 @@ export async function importFullBackupFromFile(file: File): Promise<ImportBackup
 					await db.questionSets.bulkAdd(
 						data.questionSets as Parameters<typeof db.questionSets.bulkAdd>[0]
 					);
-				if (Array.isArray(data.snippets))
-					await db.snippets.bulkAdd(data.snippets as Parameters<typeof db.snippets.bulkAdd>[0]);
 				if (Array.isArray(data.questions))
-					await db.questions.bulkAdd(data.questions as Parameters<typeof db.questions.bulkAdd>[0]);
+					await db.questions.bulkAdd(
+						data.questions as Parameters<typeof db.questions.bulkAdd>[0]
+					);
 				if (Array.isArray(data.sessions))
 					await db.sessions.bulkAdd(data.sessions as Parameters<typeof db.sessions.bulkAdd>[0]);
 				if (Array.isArray(data.sessionStudents))

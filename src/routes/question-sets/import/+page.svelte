@@ -1,71 +1,52 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { questionSetRepository } from '$lib/app/index.js';
-	import { persistSnippetFileUnderQuestionSet } from '$lib/application/question-sets/persist-snippet-file.js';
-	import { parseSnippetFile } from '$lib/importer/index.js';
+	import { persistQuestionSet } from '$lib/application/question-sets/persist-question-set.js';
+	import { parseQuestionSetFile } from '$lib/importer/index.js';
 
 	type ImportState = 'idle' | 'importing' | 'done';
 
-	interface FileError {
-		fileName: string;
-		error: string;
-	}
-
-	let hasDirectoryPicker = $state(false);
 	let importState = $state<ImportState>('idle');
-	let importedCount = $state(0);
-	let fileErrors = $state<FileError[]>([]);
-
-	onMount(() => {
-		hasDirectoryPicker = 'showDirectoryPicker' in window;
-	});
+	let importedName = $state('');
+	let importError = $state('');
 
 	function reset() {
 		importState = 'idle';
-		importedCount = 0;
-		fileErrors = [];
+		importedName = '';
+		importError = '';
 	}
 
-	async function handleSelectFolder() {
-		if (!hasDirectoryPicker) return;
-
-		let dirHandle: FileSystemDirectoryHandle;
-		try {
-			dirHandle = await window.showDirectoryPicker();
-		} catch {
-			return;
-		}
+	async function handleFileSelected(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
 
 		importState = 'importing';
-		importedCount = 0;
-		fileErrors = [];
+		importedName = '';
+		importError = '';
 
-		const folderName = dirHandle.name;
-		const questionSet = await questionSetRepository.createQuestionSet(folderName);
-
-		for await (const [name, handle] of dirHandle) {
-			if (handle.kind !== 'file' || !name.endsWith('.json')) continue;
-
-			const fileHandle = handle as FileSystemFileHandle;
-			const file = await fileHandle.getFile();
+		try {
 			const text = await file.text();
-			const result = parseSnippetFile(text);
+			const result = parseQuestionSetFile(text);
 
 			if (!result.ok) {
-				fileErrors = [...fileErrors, { fileName: name, error: result.error }];
-				continue;
+				importError = result.error;
+				importState = 'done';
+				return;
 			}
 
-			await persistSnippetFileUnderQuestionSet(
-				questionSetRepository,
-				questionSet.id,
-				result.data
-			);
+			const questionSet = await questionSetRepository.createQuestionSet(result.data.name);
+			await persistQuestionSet(questionSetRepository, questionSet.id, result.data);
 
-			importedCount += 1;
+			importedName = result.data.name;
+			importState = 'done';
+		} catch (err) {
+			console.error('Import failed:', err);
+			importError = 'Import failed. Check the console for details.';
+			importState = 'done';
 		}
 
-		importState = 'done';
+		// Reset the file input so the same file can be re-selected
+		input.value = '';
 	}
 </script>
 
@@ -88,57 +69,43 @@
 		<h1 class="text-3xl font-bold text-gray-900">Import Question Set</h1>
 	</div>
 
-	{#if !hasDirectoryPicker}
-		<div class="mb-6 rounded-md border border-yellow-200 bg-yellow-50 p-4">
-			<p class="text-sm font-medium text-yellow-800">
-				This feature requires Chrome or Edge. Firefox and Safari are not supported.
-			</p>
-		</div>
-	{/if}
-
 	{#if importState === 'idle'}
 		<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 			<p class="mb-6 text-gray-600">
-				Select a folder containing <code class="rounded bg-gray-100 px-1 py-0.5 text-sm">.json</code
-				> snippet files. All files in the folder will be imported as a single question set.
+				Select a <code class="rounded bg-gray-100 px-1 py-0.5 text-sm">.json</code> question set
+				file to import.
 			</p>
-			<button
-				onclick={handleSelectFolder}
-				disabled={!hasDirectoryPicker}
-				class="flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			<label
+				class="flex w-full cursor-pointer justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
 			>
-				Select Folder
-			</button>
+				Select File
+				<input
+					type="file"
+					accept=".json"
+					onchange={handleFileSelected}
+					class="sr-only"
+				/>
+			</label>
 		</div>
 	{:else if importState === 'importing'}
 		<div class="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
-			<p class="text-gray-600">Importing files...</p>
+			<p class="text-gray-600">Importing...</p>
 		</div>
 	{:else}
 		<div class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-			<div>
-				<h2 class="text-lg font-semibold text-gray-900">Import Complete</h2>
-				<p class="mt-1 text-gray-600">
-					{importedCount}
-					{importedCount === 1 ? 'file' : 'files'} imported successfully.
-					{#if fileErrors.length > 0}
-						{fileErrors.length}
-						{fileErrors.length === 1 ? 'file' : 'files'} had errors.
-					{/if}
-				</p>
-			</div>
-
-			{#if fileErrors.length > 0}
+			{#if importError}
 				<div>
-					<h3 class="mb-3 text-sm font-semibold text-red-700">Errors</h3>
-					<ul class="space-y-2">
-						{#each fileErrors as { fileName, error }}
-							<li class="rounded-md border border-red-200 bg-red-50 p-3">
-								<p class="text-sm font-medium text-red-800">{fileName}</p>
-								<p class="mt-0.5 text-sm text-red-600">{error}</p>
-							</li>
-						{/each}
-					</ul>
+					<h2 class="text-lg font-semibold text-red-700">Import Failed</h2>
+					<p class="mt-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+						{importError}
+					</p>
+				</div>
+			{:else}
+				<div>
+					<h2 class="text-lg font-semibold text-gray-900">Import Complete</h2>
+					<p class="mt-1 text-gray-600">
+						Question set "<strong>{importedName}</strong>" imported successfully.
+					</p>
 				</div>
 			{/if}
 

@@ -6,11 +6,7 @@ export const dexieQuestionSetRepository: QuestionSetRepository = {
 	getQuestionSet: impl.getQuestionSet,
 	listQuestionSets: impl.listQuestionSets,
 	deleteQuestionSet: impl.deleteQuestionSet,
-	createSnippet: impl.createSnippet,
-	listSnippetsByQuestionSet: impl.listSnippetsByQuestionSet,
-	deleteSnippetsByQuestionSet: impl.deleteSnippetsByQuestionSet,
 	createQuestion: impl.createQuestion,
-	listQuestionsBySnippet: impl.listQuestionsBySnippet,
 	listQuestionsByQuestionSet: impl.listQuestionsByQuestionSet,
-	deleteQuestionsBySnippet: impl.deleteQuestionsBySnippet
+	deleteQuestionsByQuestionSet: impl.deleteQuestionsByQuestionSet
 };
