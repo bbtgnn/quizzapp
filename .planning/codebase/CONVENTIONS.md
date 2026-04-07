@@ -18,7 +18,7 @@
 
 - **Routes:** SvelteKit conventions — `+page.svelte`, `+layout.svelte`, dynamic `[id]/`
 - **Tests:** `*.test.ts`, `*.spec.ts` near or under `src/lib/`; E2E `*.e2e.ts`
-- **Persistence:** Port interfaces in `src/lib/ports/`; Dexie implementations in `src/lib/adapters/persistence/dexie/repositories/`; routes and pages import **`$lib/app`** for wired repositories (not `$lib/db` for new code)
+- **Persistence:** Port interfaces in `src/lib/ports/`; Dexie implementations in `src/lib/adapters/persistence/dexie/repositories/`; routes, pages, and loaders import **`$lib/app`** for wired repositories and **`$lib/model`** for shared entity types. Do not import Dexie or `src/lib/adapters/**` from route files except through **`$lib/app`** or shared loader/helpers that follow the same boundaries.
 
 ## Svelte patterns
 
