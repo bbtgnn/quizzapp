@@ -1,8 +1,10 @@
 # SvelteKit `load` for Dexie-backed routes — design
 
+> **Current paths (2026-04-07):** This document was first written when some routes still imported **`$lib/db`**. The codebase now uses **`$lib/app`** (wired repositories and application helpers), **`$lib/model/types`** for entities, and **`src/lib/data/loaders/`** where reads are shared. IndexedDB is accessed only through the Dexie layer at **`src/lib/adapters/persistence/dexie/`** (not directly from routes).
+
 ## Goal
 
-Move **read** access to IndexedDB (Dexie) out of ad hoc `onMount` / component logic into **SvelteKit universal `load` functions** (`+page.ts`) for every route that reads from `$lib/db`, while keeping **writes** in the client and refreshing data via **invalidation**. Use a **hybrid** extraction strategy: logic lives in co-located `+page.ts` until duplication or complexity justifies a shared module under `$lib`.
+Move **read** access to IndexedDB (Dexie) out of ad hoc `onMount` / component logic into **SvelteKit universal `load` functions** (`+page.ts`) for every route that needs persisted data via **`$lib/app`** (repositories or application helpers) or thin **`src/lib/data/loaders/`** helpers, while keeping **writes** in the client and refreshing data via **invalidation**. Use a **hybrid** extraction strategy: logic lives in co-located `+page.ts` until duplication or complexity justifies a shared module under `$lib`.
 
 ## Constraints
 
@@ -12,7 +14,7 @@ Move **read** access to IndexedDB (Dexie) out of ad hoc `onMount` / component lo
 
 ## Route scope
 
-Each of the following routes today imports from `$lib/db` or opens Dexie; add or align **`+page.ts`** so **initial list/detail data** is provided via **`data`** (not duplicate `onMount` fetches for the same payload).
+Each route in the table that needs persisted reads should use **`+page.ts`** with **`$lib/app`** and/or **`src/lib/data/loaders/`** so **initial list/detail data** is provided via **`data`** (not duplicate `onMount` fetches for the same payload). Routes must not open Dexie directly.
 
 | Route | `+page.svelte` path | Intent |
 |--------|----------------------|--------|
