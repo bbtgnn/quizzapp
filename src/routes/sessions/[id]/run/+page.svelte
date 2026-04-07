@@ -3,8 +3,9 @@
 	import { resolve } from '$app/paths';
 	import { SessionEngine } from '$lib/domain/session-engine/index.js';
 	import { sessionEnginePersistence } from '$lib/app/index.js';
-	import type { Student, CodeSnippetContent } from '$lib/model/types.js';
+	import type { Student, MCAnswerConfig, TFAnswerConfig } from '$lib/model/types.js';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
+	import MarkdownContent from '$lib/components/MarkdownContent.svelte';
 
 	let { data } = $props();
 
@@ -49,6 +50,8 @@
 			return;
 		}
 		if (!engine || engine.isComplete || recording) return;
+		// MC/TF questions are graded by button clicks — suppress keyboard shortcuts
+		if (currentQuestion && currentQuestion.answer.type !== 'open') return;
 		if (e.key === '1' || e.key === 'c' || e.key === 'C') {
 			recordOutcome('correct');
 		} else if (e.key === '2' || e.key === 'p' || e.key === 'P') {
@@ -71,6 +74,20 @@
 			lastSettledStudentId = p.id;
 			pendingTransitionStudent = null;
 		}
+	}
+
+	function handleMCOption(optionIndex: number) {
+		if (!currentQuestion || recording) return;
+		const answer = currentQuestion.answer as MCAnswerConfig;
+		const outcome = optionIndex === answer.correctIndex ? 'correct' : 'wrong';
+		recordOutcome(outcome);
+	}
+
+	function handleTFButton(chosen: boolean) {
+		if (!currentQuestion || recording) return;
+		const answer = currentQuestion.answer as TFAnswerConfig;
+		const outcome = chosen === answer.correctAnswer ? 'correct' : 'wrong';
+		recordOutcome(outcome);
 	}
 
 	$effect(() => {
@@ -176,20 +193,65 @@
 							highlight={currentContent.highlight}
 						/>
 					</div>
+				{:else if currentContent && currentContent.type === 'markdown'}
+					<div class="rounded-xl bg-gray-800 p-6 shadow-lg">
+						<MarkdownContent body={currentContent.body} />
+					</div>
 				{/if}
 			</main>
 
-			<footer class="mt-8 text-center">
-				<p class="text-sm text-gray-500">
-					Press <kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">1</kbd> /
-					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">C</kbd>
-					= Correct &middot;
-					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">2</kbd> /
-					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">P</kbd>
-					= Partial &middot;
-					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">3</kbd> /
-					<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">W</kbd> = Wrong
-				</p>
+			<footer class="mt-8">
+				{#if currentQuestion.answer.type === 'open'}
+					<p class="text-center text-sm text-gray-500">
+						Press <kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">1</kbd> /
+						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">C</kbd>
+						= Correct &middot;
+						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">2</kbd> /
+						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">P</kbd>
+						= Partial &middot;
+						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">3</kbd> /
+						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">W</kbd> = Wrong
+					</p>
+				{:else if currentQuestion.answer.type === 'multiple-choice'}
+					<div class="space-y-3">
+						<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
+						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+							{#each (currentQuestion.answer as MCAnswerConfig).options as option, i}
+								<button
+									type="button"
+									disabled={recording}
+									onclick={() => handleMCOption(i)}
+									class="rounded-xl border border-gray-600 bg-gray-800 px-5 py-4 text-left text-base font-medium text-gray-100 transition-colors hover:border-blue-500 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									<span class="mr-2 font-mono text-gray-400">{String.fromCharCode(65 + i)}.</span>
+									{option}
+								</button>
+							{/each}
+						</div>
+					</div>
+				{:else if currentQuestion.answer.type === 'true-false'}
+					<div class="space-y-3">
+						<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
+						<div class="flex justify-center gap-6">
+							<button
+								type="button"
+								disabled={recording}
+								onclick={() => handleTFButton(true)}
+								class="rounded-xl border border-gray-600 bg-gray-800 px-10 py-4 text-xl font-semibold text-green-400 transition-colors hover:border-green-500 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								True
+							</button>
+							<button
+								type="button"
+								disabled={recording}
+								onclick={() => handleTFButton(false)}
+								class="rounded-xl border border-gray-600 bg-gray-800 px-10 py-4 text-xl font-semibold text-red-400 transition-colors hover:border-red-500 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								False
+							</button>
+						</div>
+					</div>
+				{/if}
 			</footer>
 		</div>
 	{:else}
