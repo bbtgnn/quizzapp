@@ -1,10 +1,12 @@
 # Hexagonal ports & adapters — implementation plan
 
+> **Status (2026-04-07):** The temporary folder **`src/lib/db/`** has been **removed** after migration. Use **`$lib/app`** and **`$lib/model`** for application imports; Dexie lives only under **`src/lib/adapters/persistence/dexie/`**. The file map and task checklist below are **historical** migration context.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Restructure the client data and domain code into **ports**, **Dexie adapters**, **`application` services**, and **`$lib/app` composition**, without changing user-visible behavior, and make **SessionEngine** independent of concrete persistence imports.
 
-**Architecture:** Canonical entity types live in **`src/lib/model/types.ts`**. **`src/lib/ports/`** holds repository interfaces. **`src/lib/adapters/persistence/dexie/`** owns `QuizAppDB`, repository functions, and backup I/O. **`src/lib/db/`** becomes a **compatibility re-export layer** until all imports migrate to `$lib/app` or `$lib/model`. **`src/lib/application/`** adds use cases tested with stub ports. **`src/lib/domain/`** holds **SessionEngine**, **question-selector**, and **student-orderer** (moved from flat `lib` paths) with imports only from **`$lib/model`** and **`$lib/ports`** (types), not from adapters. Routes and loaders import **`$lib/app`** for wired services and persistence helpers.
+**Architecture:** Canonical entity types live in **`src/lib/model/types.ts`**. **`src/lib/ports/`** holds repository interfaces. **`src/lib/adapters/persistence/dexie/`** owns `QuizAppDB`, repository functions, and backup I/O. A short-lived **`src/lib/db/`** compatibility re-export layer existed during migration and **has been deleted**; use **`$lib/app`** and **`$lib/model`**. **`src/lib/application/`** adds use cases tested with stub ports. **`src/lib/domain/`** holds **SessionEngine**, **question-selector**, and **student-orderer** (moved from flat `lib` paths) with imports only from **`$lib/model`** and **`$lib/ports`** (types), not from adapters. Routes and loaders import **`$lib/app`** for wired services and persistence helpers.
 
 **Tech stack:** SvelteKit 2, Svelte 5, TypeScript, Dexie 4, Vitest, Playwright, bun.
 
@@ -15,7 +17,6 @@
 | Path | Role |
 |------|------|
 | `src/lib/model/types.ts` | Canonical entity interfaces (today’s `db/types.ts` content). |
-| `src/lib/db/types.ts` | Re-export `export * from '$lib/model/types.js'` (compat). |
 | `src/lib/ports/session-repository.ts` | `SessionRepository` interface. |
 | `src/lib/ports/classroom-repository.ts` | `ClassroomRepository` interface. |
 | `src/lib/ports/question-set-repository.ts` | `QuestionSetRepository` interface. |
@@ -28,10 +29,7 @@
 | `src/lib/adapters/persistence/dexie/classroom-repository.adapter.ts` | Implements `ClassroomRepository`. |
 | `src/lib/adapters/persistence/dexie/question-set-repository.adapter.ts` | Implements `QuestionSetRepository`. |
 | `src/lib/adapters/persistence/dexie/attempt-repository.adapter.ts` | Implements `AttemptRepository`. |
-| `src/lib/db/schema.ts` | Re-export `db` from dexie adapter (compat). |
-| `src/lib/db/repositories/*.ts` | Re-export each function from adapter repositories (compat). |
-| `src/lib/db/backup.ts` | Re-export backup functions from adapter (compat). |
-| `src/lib/db/index.ts` | Narrow over time: re-export types, `db`, repos, backup via compat shims until callers migrate. |
+| `src/lib/db/**` *(removed)* | Temporary re-exports during migration; **do not recreate**. Use `$lib/model`, `$lib/app`, and `adapters/persistence/dexie/`. |
 | `src/lib/app/repositories.ts` | Production singletons: `sessionRepository`, `classroomRepository`, etc. |
 | `src/lib/app/session-engine-persistence.ts` | `sessionEnginePersistence` object satisfying `SessionEnginePersistence`. |
 | `src/lib/app/backup.ts` | Re-export backup API for Settings (routes must not import adapters). |
@@ -44,7 +42,7 @@
 | `src/lib/domain/student-orderer/**` | Moved from `lib/student-orderer/**`. |
 | `src/lib/application/question-sets/persist-snippet-file.ts` | One parsed JSON file → snippet + questions under an existing question set id. |
 | `src/lib/application/question-sets/persist-snippet-file.test.ts` | Stub `QuestionSetRepository`. |
-| `src/routes/**/*.svelte`, `src/routes/**/*.ts`, `src/lib/data/loaders/*.ts`, `src/lib/components/CodeBlock.svelte` | Switch imports from `$lib/db` / old domain paths to `$lib/app` / `$lib/model` / `$lib/domain`. |
+| `src/routes/**/*.svelte`, `src/routes/**/*.ts`, `src/lib/data/loaders/*.ts`, `src/lib/components/CodeBlock.svelte` | Migration target: **`$lib/app`** / **`$lib/model`** / **`$lib/domain`** only; **`$lib/db`** removed — do not reintroduce. |
 | `.planning/codebase/ARCHITECTURE.md`, `.planning/codebase/CONVENTIONS.md` | Document ports, adapters, `app/`, `domain/`, `model/`. |
 | `docs/superpowers/specs/2026-04-07-hexagonal-ports-adapters-design.md` | Append rows to **Exception list** only if a route is granted direct read-port access without a service. |
 
