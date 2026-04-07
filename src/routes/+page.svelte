@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { deleteClassroom } from '$lib/db/index.js';
 	import type { PageProps } from './$types';
 
@@ -30,31 +31,31 @@
 		<h1 class="text-3xl font-bold text-gray-900">Classrooms</h1>
 		<div class="flex items-center gap-3">
 			<a
-				href="/sessions"
+				href={resolve('/sessions')}
 				class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 			>
 				Sessions
 			</a>
 			<a
-				href="/history"
+				href={resolve('/history')}
 				class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 			>
 				History
 			</a>
 			<a
-				href="/question-sets"
+				href={resolve('/question-sets')}
 				class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 			>
 				Question Sets
 			</a>
 			<a
-				href="/settings"
+				href={resolve('/settings')}
 				class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 			>
 				Settings
 			</a>
 			<a
-				href="/classrooms/new"
+				href={resolve('/classrooms/new')}
 				class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 			>
 				New Classroom
@@ -68,7 +69,7 @@
 			<p class="mt-1 text-sm text-gray-500">Get started by creating a new classroom.</p>
 			<div class="mt-6">
 				<a
-					href="/classrooms/new"
+					href={resolve('/classrooms/new')}
 					class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
 				>
 					<svg
@@ -100,7 +101,7 @@
 					</div>
 					<div class="mt-6 flex items-center justify-end space-x-3">
 						<a
-							href="/classrooms/{classroom.id}"
+							href={resolve(`/classrooms/${classroom.id}`)}
 							class="text-sm font-medium text-blue-600 hover:text-blue-800"
 						>
 							Edit

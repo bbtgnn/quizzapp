@@ -1,58 +1,33 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { SessionEngine } from '$lib/session-engine/index.js';
-	import {
-		getSession,
-		listSessionStudents,
-		listStudentsByClassroom,
-		listSnippetsByQuestionSet,
-		listQuestionsBySnippet,
-		listAttemptsBySession
-	} from '$lib/db/index.js';
-	import type { Question, Snippet, Student } from '$lib/db/types.js';
+	import type { Snippet, Student } from '$lib/db/types.js';
+	import type { PageProps } from './$types';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
+
+	let { data }: PageProps = $props();
 
 	let engine = $state.raw<SessionEngine | null>(null);
 	let tick = $state(0);
 	let recording = $state(false);
-	let snippetMap = new Map<string, Snippet>();
+	let snippetMap = $state(new Map<string, Snippet>());
 	/** Student id after their transition was dismissed (questions visible). */
 	let lastSettledStudentId = $state<string | null>(null);
 	let pendingTransitionStudent = $state<Student | null>(null);
 
-	onMount(async () => {
-		const sessionId = page.params.id;
-		if (!sessionId) {
-			goto('/sessions');
-			return;
-		}
-
-		const session = await getSession(sessionId);
-		if (!session) {
-			goto('/sessions');
-			return;
-		}
-
-		const sessionStudents = await listSessionStudents(sessionId);
-		const students = await listStudentsByClassroom(session.classroom_id);
-
-		const allQuestions: Question[] = [];
-		for (const qsId of session.question_set_ids) {
-			const snippets = await listSnippetsByQuestionSet(qsId);
-			for (const snippet of snippets) {
-				const qs = await listQuestionsBySnippet(snippet.id);
-				for (const q of qs) {
-					snippetMap.set(q.id, snippet);
-				}
-				allQuestions.push(...qs);
-			}
-		}
-
-		const attempts = await listAttemptsBySession(sessionId);
-
-		engine = new SessionEngine(session, sessionStudents, students, allQuestions, attempts);
+	$effect(() => {
+		snippetMap = new Map(Object.entries(data.snippetByQuestionId));
+		engine = new SessionEngine(
+			data.session,
+			data.sessionStudents,
+			data.students,
+			data.allQuestions,
+			data.attempts
+		);
+		tick = 0;
+		lastSettledStudentId = null;
+		pendingTransitionStudent = null;
 	});
 
 	async function recordOutcome(outcome: 'correct' | 'partial' | 'wrong') {
@@ -87,7 +62,7 @@
 	async function handlePause() {
 		if (engine) {
 			await engine.pause();
-			goto('/sessions');
+			goto(resolve('/sessions'));
 		}
 	}
 
@@ -101,7 +76,7 @@
 
 	$effect(() => {
 		if (!engine || engine.isComplete) return;
-		tick;
+		void tick;
 		const cs = engine.currentStudent;
 		if (!cs) return;
 		// Already showing transition for this student
@@ -132,7 +107,7 @@
 			<h1 class="text-5xl font-bold text-green-400">Session Complete!</h1>
 			<p class="text-xl text-gray-300">All students have finished their questions.</p>
 			<a
-				href="/sessions"
+				href={resolve('/sessions')}
 				class="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
 			>
 				Back to Sessions

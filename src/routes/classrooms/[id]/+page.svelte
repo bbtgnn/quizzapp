@@ -1,50 +1,23 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import {
-		getClassroom,
-		listStudentsByClassroom,
-		updateClassroom,
-		createStudent,
-		deleteStudent,
-		deleteClassroom
-	} from '$lib/db/index.js';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { updateClassroom, createStudent, deleteStudent, deleteClassroom } from '$lib/db/index.js';
 	import type { Classroom, Student } from '$lib/db/types.js';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 
 	let classroom = $state<Classroom | null>(null);
 	let students = $state<Student[]>([]);
-	let loading = $state(true);
-	let error = $state<string | null>(null);
+
+	$effect(() => {
+		classroom = { ...data.classroom };
+		students = data.students;
+	});
 
 	let newStudentName = $state('');
 	let isAddingStudent = $state(false);
 	let isUpdatingName = $state(false);
-
-	const classroomId = $derived(page.params.id as string);
-
-	async function loadData() {
-		loading = true;
-		error = null;
-		try {
-			const c = await getClassroom(classroomId);
-			if (!c) {
-				error = 'Classroom not found';
-				return;
-			}
-			classroom = c;
-			students = await listStudentsByClassroom(classroomId);
-		} catch (err) {
-			console.error('Failed to load classroom:', err);
-			error = 'Failed to load classroom data';
-		} finally {
-			loading = false;
-		}
-	}
-
-	onMount(() => {
-		loadData();
-	});
 
 	async function handleUpdateName(e: Event) {
 		e.preventDefault();
@@ -53,6 +26,7 @@
 		isUpdatingName = true;
 		try {
 			await updateClassroom(classroom.id, { name: classroom.name.trim() });
+			await invalidateAll();
 		} catch (err) {
 			console.error('Failed to update classroom name:', err);
 			alert('Failed to update classroom name');
@@ -67,9 +41,9 @@
 
 		isAddingStudent = true;
 		try {
-			const newStudent = await createStudent(classroom.id, newStudentName.trim());
-			students = [...students, newStudent];
+			await createStudent(classroom.id, newStudentName.trim());
 			newStudentName = '';
+			await invalidateAll();
 		} catch (err) {
 			console.error('Failed to add student:', err);
 			alert('Failed to add student');
@@ -83,7 +57,7 @@
 
 		try {
 			await deleteStudent(id);
-			students = students.filter((s) => s.id !== id);
+			await invalidateAll();
 		} catch (err) {
 			console.error('Failed to remove student:', err);
 			alert('Failed to remove student');
@@ -93,24 +67,25 @@
 	async function handleDeleteClassroom() {
 		if (!classroom) return;
 		if (
-			confirm(
+			!confirm(
 				'Are you sure you want to delete this classroom? All students and their data will be lost.'
 			)
 		) {
-			try {
-				await deleteClassroom(classroom.id);
-				goto('/');
-			} catch (err) {
-				console.error('Failed to delete classroom:', err);
-				alert('Failed to delete classroom');
-			}
+			return;
+		}
+		try {
+			await deleteClassroom(classroom.id);
+			goto(resolve('/'));
+		} catch (err) {
+			console.error('Failed to delete classroom:', err);
+			alert('Failed to delete classroom');
 		}
 	}
 </script>
 
 <div class="mx-auto max-w-3xl p-6">
 	<div class="mb-8 flex items-center space-x-4">
-		<a href="/" class="text-gray-500 hover:text-gray-700" aria-label="Back to classrooms">
+		<a href={resolve('/')} class="text-gray-500 hover:text-gray-700" aria-label="Back to classrooms">
 			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path
 					stroke-linecap="round"
@@ -123,25 +98,7 @@
 		<h1 class="text-3xl font-bold text-gray-900">Edit Classroom</h1>
 	</div>
 
-	{#if loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-			></div>
-		</div>
-	{:else if error || !classroom}
-		<div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-			<h3 class="mt-2 text-sm font-semibold text-gray-900">{error || 'Classroom not found'}</h3>
-			<div class="mt-6">
-				<a
-					href="/"
-					class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-				>
-					Back to Classrooms
-				</a>
-			</div>
-		</div>
-	{:else}
+	{#if classroom}
 		<div class="space-y-8">
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 				<h2 class="mb-4 text-lg font-medium text-gray-900">Classroom Details</h2>

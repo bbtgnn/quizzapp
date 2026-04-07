@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { db } from '$lib/db/schema.js';
+	import { resolve } from '$app/paths';
+	import { exportFullBackup, importFullBackupFromFile } from '$lib/db/backup.js';
 
 	let importError = $state<string | null>(null);
 	let importSuccess = $state(false);
@@ -9,46 +10,7 @@
 	async function exportData() {
 		exporting = true;
 		try {
-			const [
-				classrooms,
-				students,
-				questionSets,
-				snippets,
-				questions,
-				sessions,
-				sessionStudents,
-				attempts
-			] = await Promise.all([
-				db.classrooms.toArray(),
-				db.students.toArray(),
-				db.questionSets.toArray(),
-				db.snippets.toArray(),
-				db.questions.toArray(),
-				db.sessions.toArray(),
-				db.sessionStudents.toArray(),
-				db.attempts.toArray()
-			]);
-
-			const data = {
-				version: 1,
-				exportedAt: Date.now(),
-				classrooms,
-				students,
-				questionSets,
-				snippets,
-				questions,
-				sessions,
-				sessionStudents,
-				attempts
-			};
-
-			const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `quizapp-backup-${new Date().toISOString().split('T')[0]}.json`;
-			a.click();
-			URL.revokeObjectURL(url);
+			await exportFullBackup();
 		} finally {
 			exporting = false;
 		}
@@ -60,77 +22,12 @@
 		importing = true;
 
 		try {
-			const text = await file.text();
-			let parsed: unknown;
-			try {
-				parsed = JSON.parse(text);
-			} catch {
-				importError = 'Invalid JSON file. Please select a valid backup file.';
+			const result = await importFullBackupFromFile(file);
+			if (!result.ok) {
+				if ('cancelled' in result && result.cancelled) return;
+				importError = 'error' in result ? result.error : 'Import failed.';
 				return;
 			}
-
-			if (typeof parsed !== 'object' || parsed === null || !('version' in parsed)) {
-				importError = 'Unrecognised file format. Missing version field.';
-				return;
-			}
-
-			const data = parsed as Record<string, unknown>;
-			if (data.version !== 1) {
-				importError = `Unsupported version: ${data.version}. This app supports version 1 only.`;
-				return;
-			}
-
-			if (!confirm('This will replace ALL existing data. Are you sure?')) return;
-
-			await db.transaction(
-				'rw',
-				[
-					db.classrooms,
-					db.students,
-					db.questionSets,
-					db.snippets,
-					db.questions,
-					db.sessions,
-					db.sessionStudents,
-					db.attempts
-				],
-				async () => {
-					await db.classrooms.clear();
-					await db.students.clear();
-					await db.questionSets.clear();
-					await db.snippets.clear();
-					await db.questions.clear();
-					await db.sessions.clear();
-					await db.sessionStudents.clear();
-					await db.attempts.clear();
-
-					if (Array.isArray(data.classrooms))
-						await db.classrooms.bulkAdd(
-							data.classrooms as Parameters<typeof db.classrooms.bulkAdd>[0]
-						);
-					if (Array.isArray(data.students))
-						await db.students.bulkAdd(data.students as Parameters<typeof db.students.bulkAdd>[0]);
-					if (Array.isArray(data.questionSets))
-						await db.questionSets.bulkAdd(
-							data.questionSets as Parameters<typeof db.questionSets.bulkAdd>[0]
-						);
-					if (Array.isArray(data.snippets))
-						await db.snippets.bulkAdd(data.snippets as Parameters<typeof db.snippets.bulkAdd>[0]);
-					if (Array.isArray(data.questions))
-						await db.questions.bulkAdd(
-							data.questions as Parameters<typeof db.questions.bulkAdd>[0]
-						);
-					if (Array.isArray(data.sessions))
-						await db.sessions.bulkAdd(data.sessions as Parameters<typeof db.sessions.bulkAdd>[0]);
-					if (Array.isArray(data.sessionStudents))
-						await db.sessionStudents.bulkAdd(
-							data.sessionStudents as Parameters<typeof db.sessionStudents.bulkAdd>[0]
-						);
-					if (Array.isArray(data.attempts))
-						await db.attempts.bulkAdd(data.attempts as Parameters<typeof db.attempts.bulkAdd>[0]);
-				}
-			);
-
 			importSuccess = true;
 		} finally {
 			importing = false;
@@ -142,7 +39,6 @@
 		const file = input.files?.[0];
 		if (file) {
 			importData(file);
-			// Reset input so same file can be re-selected
 			input.value = '';
 		}
 	}
@@ -151,7 +47,7 @@
 <div class="mx-auto max-w-2xl p-6">
 	<div class="mb-8 flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">Settings</h1>
-		<a href="/" class="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to Home</a>
+		<a href={resolve('/')} class="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to Home</a>
 	</div>
 
 	<div class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">

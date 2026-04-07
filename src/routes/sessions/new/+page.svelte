@@ -1,18 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import {
-		listClassrooms,
-		listQuestionSets,
-		createSession,
-		listStudentsByClassroom,
-		createSessionStudent
-	} from '$lib/db/index.js';
-	import type { Classroom, QuestionSet } from '$lib/db/types.js';
+	import { resolve } from '$app/paths';
+	import { createSession, listStudentsByClassroom, createSessionStudent } from '$lib/db/index.js';
+	import type { PageProps } from './$types';
 
-	let classrooms = $state<Classroom[]>([]);
-	let questionSets = $state<QuestionSet[]>([]);
-	let loading = $state(true);
+	let { data }: PageProps = $props();
 
 	let selectedClassroomId = $state('');
 	let selectedQuestionSetIds = $state<string[]>([]);
@@ -20,27 +12,6 @@
 
 	let isSubmitting = $state(false);
 	let error = $state<string | null>(null);
-
-	async function loadData() {
-		loading = true;
-		try {
-			const [dbClassrooms, dbQuestionSets] = await Promise.all([
-				listClassrooms(),
-				listQuestionSets()
-			]);
-			classrooms = dbClassrooms.sort((a, b) => b.created_at - a.created_at);
-			questionSets = dbQuestionSets.sort((a, b) => b.imported_at - a.imported_at);
-		} catch (e) {
-			console.error('Failed to load data:', e);
-			error = 'Failed to load classrooms and question sets.';
-		} finally {
-			loading = false;
-		}
-	}
-
-	onMount(() => {
-		loadData();
-	});
 
 	function toggleQuestionSet(id: string) {
 		if (selectedQuestionSetIds.includes(id)) {
@@ -87,7 +58,7 @@
 				)
 			);
 
-			goto(`/sessions/${session.id}/run`);
+			goto(resolve(`/sessions/${session.id}/run`));
 		} catch (err) {
 			console.error('Failed to start session:', err);
 			error = 'Failed to start session. Please try again.';
@@ -98,7 +69,7 @@
 
 <div class="mx-auto max-w-2xl p-6">
 	<div class="mb-8 flex items-center space-x-4">
-		<a href="/sessions" class="text-gray-500 hover:text-gray-700" aria-label="Back to sessions">
+		<a href={resolve('/sessions')} class="text-gray-500 hover:text-gray-700" aria-label="Back to sessions">
 			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path
 					stroke-linecap="round"
@@ -111,26 +82,25 @@
 		<h1 class="text-3xl font-bold text-gray-900">Start New Session</h1>
 	</div>
 
-	{#if loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-			></div>
+	{#if data.loadError}
+		<div class="rounded-lg border-2 border-dashed border-red-200 bg-red-50 p-12 text-center">
+			<h3 class="mt-2 text-sm font-semibold text-red-900">Could not load data</h3>
+			<p class="mt-1 text-sm text-red-700">{data.loadError}</p>
 		</div>
-	{:else if classrooms.length === 0}
+	{:else if data.classrooms.length === 0}
 		<div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
 			<h3 class="mt-2 text-sm font-semibold text-gray-900">No classrooms found</h3>
 			<p class="mt-1 text-sm text-gray-500">You need a classroom to start a session.</p>
 			<div class="mt-6">
 				<a
-					href="/classrooms/new"
+					href={resolve('/classrooms/new')}
 					class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
 				>
 					Create a classroom
 				</a>
 			</div>
 		</div>
-	{:else if questionSets.length === 0}
+	{:else if data.questionSets.length === 0}
 		<div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
 			<h3 class="mt-2 text-sm font-semibold text-gray-900">No question sets found</h3>
 			<p class="mt-1 text-sm text-gray-500">
@@ -138,7 +108,7 @@
 			</p>
 			<div class="mt-6">
 				<a
-					href="/question-sets"
+					href={resolve('/question-sets')}
 					class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
 				>
 					Import a question set
@@ -170,7 +140,7 @@
 						required
 					>
 						<option value="" disabled>Select a classroom</option>
-						{#each classrooms as classroom (classroom.id)}
+						{#each data.classrooms as classroom (classroom.id)}
 							<option value={classroom.id}>{classroom.name}</option>
 						{/each}
 					</select>
@@ -180,7 +150,7 @@
 			<div>
 				<span class="mb-2 block text-sm font-medium text-gray-700">Question Sets</span>
 				<div class="space-y-2 rounded-md border border-gray-300 p-4">
-					{#each questionSets as questionSet (questionSet.id)}
+					{#each data.questionSets as questionSet (questionSet.id)}
 						<div class="flex items-center">
 							<input
 								id="qs-{questionSet.id}"
