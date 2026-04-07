@@ -19,7 +19,6 @@
 - **Ports:** `src/lib/ports/*.ts` — repository interfaces and `SessionEnginePersistence`
 - **Dexie adapter:** `src/lib/adapters/persistence/dexie/` — `QuizAppDB` (`schema.ts`), repository functions (`repositories/`), adapter objects (`*-repository.adapter.ts`), backup (`backup.ts`)
 - **Composition:** `src/lib/app/` — production singleton repositories, `sessionEnginePersistence`, backup re-exports
-- **Legacy barrel:** `src/lib/db/*` — thin re-exports for backward compatibility; **prefer `$lib/app` and `$lib/model` for new code**
 
 ### Session runtime (domain logic)
 
