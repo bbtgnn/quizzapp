@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { SessionEngine } from './index.js';
-import type { Attempt, Question, Session, SessionStudent, Student } from '$lib/db/types.js';
+import type { Attempt, Question, Session, SessionStudent, Student } from '$lib/model/types.js';
 
 const makeStudent = (id: string): Student => ({ id, classroom_id: 'c1', name: `Student ${id}` });
 const makeQuestion = (id: string): Question => ({

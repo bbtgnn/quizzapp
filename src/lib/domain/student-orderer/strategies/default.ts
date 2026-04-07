@@ -1,5 +1,5 @@
 import type { StudentOrderStrategy } from '../types.js';
-import type { Student, SessionStudent } from '$lib/db/types.js';
+import type { Student, SessionStudent } from '$lib/model/types.js';
 
 function fisherYatesShuffle<T>(arr: T[]): T[] {
 	const result = [...arr];

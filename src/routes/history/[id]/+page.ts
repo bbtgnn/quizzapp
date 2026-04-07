@@ -1,11 +1,11 @@
 import { error } from '@sveltejs/kit';
 import {
-	getSession,
-	listAttemptsBySession,
-	listStudentsByClassroom,
-	listQuestionsByQuestionSet
-} from '$lib/db/index.js';
-import type { Attempt, Question, Student } from '$lib/db/types.js';
+	classroomRepository,
+	attemptRepository,
+	questionSetRepository,
+	sessionRepository
+} from '$lib/app/index.js';
+import type { Attempt, Question, Student } from '$lib/model/types.js';
 
 export type AttemptWithDetails = Attempt & { questionText: string };
 export type StudentWithAttempts = Student & { attempts: AttemptWithDetails[] };
@@ -15,17 +15,17 @@ export const load = async ({ params }) => {
 	if (!sessionId) throw error(404, { message: 'Session not found' });
 
 	try {
-		const loadedSession = await getSession(sessionId);
+		const loadedSession = await sessionRepository.getSession(sessionId);
 		if (!loadedSession) throw error(404, { message: 'Session not found' });
 
 		const [attempts, students] = await Promise.all([
-			listAttemptsBySession(sessionId),
-			listStudentsByClassroom(loadedSession.classroom_id)
+			attemptRepository.listAttemptsBySession(sessionId),
+			classroomRepository.listStudentsByClassroom(loadedSession.classroom_id)
 		]);
 
 		const questionsMap = new Map<string, Question>();
 		for (const qsId of loadedSession.question_set_ids) {
-			const qsQuestions = await listQuestionsByQuestionSet(qsId);
+			const qsQuestions = await questionSetRepository.listQuestionsByQuestionSet(qsId);
 			for (const q of qsQuestions) questionsMap.set(q.id, q);
 		}
 

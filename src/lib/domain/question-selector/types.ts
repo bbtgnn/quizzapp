@@ -1,4 +1,4 @@
-import type { Attempt, Question, Student } from '$lib/db/types.js';
+import type { Attempt, Question, Student } from '$lib/model/types.js';
 
 export type { Attempt, Question, Student };
 

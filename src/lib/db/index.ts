@@ -1,3 +1,7 @@
+/**
+ * Legacy barrel: re-exports persistence for older imports.
+ * Prefer `$lib/app` for wired repositories and `$lib/model` for entity types.
+ */
 export { db } from './schema.js';
 
 export type {

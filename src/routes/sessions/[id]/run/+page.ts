@@ -1,35 +1,33 @@
 import { error } from '@sveltejs/kit';
 import {
-	getSession,
-	listSessionStudents,
-	listStudentsByClassroom,
-	listSnippetsByQuestionSet,
-	listQuestionsBySnippet,
-	listAttemptsBySession
-} from '$lib/db/index.js';
-import type { Question, Snippet } from '$lib/db/types.js';
+	classroomRepository,
+	attemptRepository,
+	questionSetRepository,
+	sessionRepository
+} from '$lib/app/index.js';
+import type { Question, Snippet } from '$lib/model/types.js';
 
 export const load = async ({ params }) => {
 	const sessionId = params.id;
 	if (!sessionId) throw error(404, { message: 'Session not found' });
 
 	try {
-		const session = await getSession(sessionId);
+		const session = await sessionRepository.getSession(sessionId);
 		if (!session) throw error(404, { message: 'Session not found' });
 
 		const [sessionStudents, students, attempts] = await Promise.all([
-			listSessionStudents(sessionId),
-			listStudentsByClassroom(session.classroom_id),
-			listAttemptsBySession(sessionId)
+			sessionRepository.listSessionStudents(sessionId),
+			classroomRepository.listStudentsByClassroom(session.classroom_id),
+			attemptRepository.listAttemptsBySession(sessionId)
 		]);
 
 		const snippetByQuestionId: Record<string, Snippet> = {};
 		const allQuestions: Question[] = [];
 
 		for (const qsId of session.question_set_ids) {
-			const snippets = await listSnippetsByQuestionSet(qsId);
+			const snippets = await questionSetRepository.listSnippetsByQuestionSet(qsId);
 			for (const snippet of snippets) {
-				const qs = await listQuestionsBySnippet(snippet.id);
+				const qs = await questionSetRepository.listQuestionsBySnippet(snippet.id);
 				for (const q of qs) {
 					snippetByQuestionId[q.id] = snippet;
 				}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createHighlighter, type Highlighter } from 'shiki';
-	import type { Highlight } from '$lib/db/types';
+	import type { Highlight } from '$lib/model/types.js';
 
 	let {
 		code,

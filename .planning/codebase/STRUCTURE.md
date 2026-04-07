@@ -32,11 +32,14 @@
 
 | Path | Purpose |
 |------|---------|
-| `db/` | Dexie schema (`schema.ts`), types, `repositories/`, `index.ts` |
-| `session-engine/` | Core session orchestration (`index.ts`, `session-engine.test.ts`) |
-| `question-selector/` | Pluggable question pick strategies |
-| `student-orderer/` | Pluggable student ordering |
-| `importer/` | Question set import from files |
+| `model/` | Canonical entity types (`types.ts`) |
+| `ports/` | Repository and persistence interfaces |
+| `adapters/persistence/dexie/` | Dexie schema, repository functions, adapter objects, backup |
+| `app/` | Composition root: wired repositories, `sessionEnginePersistence`, backup exports |
+| `application/` | Use cases (orchestrate ports; tested with stubs) |
+| `domain/` | `session-engine/`, `question-selector/`, `student-orderer/` |
+| `db/` | Legacy re-exports (prefer `app/` + `model/`) |
+| `importer/` | Question set JSON parsing |
 | `components/` | Shared Svelte components |
 | `vitest-examples/` | Example tests (greet, Welcome) |
 
@@ -50,8 +53,8 @@
 |------|----------|
 | New screen | `src/routes/.../+page.svelte` |
 | Shared UI | `src/lib/components/` |
-| DB access | `src/lib/db/repositories/` + types in `types.ts` |
-| Session rules | `src/lib/session-engine/` or selector/orderer strategies |
+| DB access | Ports in `src/lib/ports/`; Dexie in `src/lib/adapters/persistence/dexie/`; wire via `src/lib/app/` |
+| Session rules | `src/lib/domain/session-engine/` or domain selector/orderer strategies |
 | New question JSON | `question-sets/` or import pipeline |
 
 ---

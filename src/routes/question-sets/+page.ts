@@ -1,21 +1,17 @@
 import { error } from '@sveltejs/kit';
-import {
-	listQuestionSets,
-	listSnippetsByQuestionSet,
-	listQuestionsByQuestionSet
-} from '$lib/db/index.js';
-import type { QuestionSet } from '$lib/db/types.js';
+import { questionSetRepository } from '$lib/app/index.js';
+import type { QuestionSet } from '$lib/model/types.js';
 
 export type QuestionSetWithCounts = QuestionSet & { snippetCount: number; questionCount: number };
 
 export const load = async () => {
 	try {
-		const dbQuestionSets = await listQuestionSets();
+		const dbQuestionSets = await questionSetRepository.listQuestionSets();
 		const withCounts: QuestionSetWithCounts[] = await Promise.all(
 			dbQuestionSets.map(async (qs) => {
 				const [snippets, questions] = await Promise.all([
-					listSnippetsByQuestionSet(qs.id),
-					listQuestionsByQuestionSet(qs.id)
+					questionSetRepository.listSnippetsByQuestionSet(qs.id),
+					questionSetRepository.listQuestionsByQuestionSet(qs.id)
 				]);
 				return { ...qs, snippetCount: snippets.length, questionCount: questions.length };
 			})

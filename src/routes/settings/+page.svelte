@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { exportFullBackup, importFullBackupFromFile } from '$lib/db/backup.js';
+	import { exportFullBackup, importFullBackupFromFile } from '$lib/app/index.js';
 
 	let importError = $state<string | null>(null);
 	let importSuccess = $state(false);

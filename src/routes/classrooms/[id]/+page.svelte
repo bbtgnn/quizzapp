@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { updateClassroom, createStudent, deleteStudent, deleteClassroom } from '$lib/db/index.js';
-	import type { Classroom, Student } from '$lib/db/types.js';
+	import { classroomRepository } from '$lib/app/index.js';
+	import type { Classroom, Student } from '$lib/model/types.js';
 	let { data } = $props();
 
 	let classroom = $state<Classroom | null>(null);
@@ -23,7 +23,7 @@
 
 		isUpdatingName = true;
 		try {
-			await updateClassroom(classroom.id, { name: classroom.name.trim() });
+			await classroomRepository.updateClassroom(classroom.id, { name: classroom.name.trim() });
 			await invalidateAll();
 		} catch (err) {
 			console.error('Failed to update classroom name:', err);
@@ -39,7 +39,7 @@
 
 		isAddingStudent = true;
 		try {
-			await createStudent(classroom.id, newStudentName.trim());
+			await classroomRepository.createStudent(classroom.id, newStudentName.trim());
 			newStudentName = '';
 			await invalidateAll();
 		} catch (err) {
@@ -54,7 +54,7 @@
 		if (!confirm('Are you sure you want to remove this student?')) return;
 
 		try {
-			await deleteStudent(id);
+			await classroomRepository.deleteStudent(id);
 			await invalidateAll();
 		} catch (err) {
 			console.error('Failed to remove student:', err);
@@ -72,7 +72,7 @@
 			return;
 		}
 		try {
-			await deleteClassroom(classroom.id);
+			await classroomRepository.deleteClassroom(classroom.id);
 			goto(resolve('/'));
 		} catch (err) {
 			console.error('Failed to delete classroom:', err);

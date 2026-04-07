@@ -9,8 +9,8 @@
 ## IndexedDB (Dexie)
 
 - **Integration:** Dexie wraps the browser **IndexedDB** API
-- **Database name:** `QuizAppDB` (`src/lib/db/schema.ts`)
-- **Usage:** Classrooms, students, question sets, questions/snippets, sessions, session-students, attempts — see `src/lib/db/repositories/*.ts`
+- **Database name:** `QuizAppDB` (`src/lib/adapters/persistence/dexie/schema.ts`)
+- **Usage:** Classrooms, students, question sets, questions/snippets, sessions, session-students, attempts — see `src/lib/adapters/persistence/dexie/repositories/*.ts`
 - **Notes:** Data stays on the user’s machine unless export/import or a future sync layer is added
 
 ## File system (import)

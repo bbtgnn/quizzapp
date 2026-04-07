@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { defaultStrategy } from './default.js';
-import type { Attempt, Question, Student } from '$lib/db/types.js';
+import type { Attempt, Question, Student } from '$lib/model/types.js';
 
 const makeStudent = (id = 's1'): Student => ({
 	id,

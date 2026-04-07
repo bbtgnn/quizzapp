@@ -1,14 +1,14 @@
 import { error } from '@sveltejs/kit';
-import { getClassroom, listStudentsByClassroom } from '$lib/db/index.js';
+import { classroomRepository } from '$lib/app/index.js';
 
 export const load = async ({ params }) => {
 	const id = params.id;
 	if (!id) throw error(404, { message: 'Classroom not found' });
 
 	try {
-		const classroom = await getClassroom(id);
+		const classroom = await classroomRepository.getClassroom(id);
 		if (!classroom) throw error(404, { message: 'Classroom not found' });
-		const students = await listStudentsByClassroom(id);
+		const students = await classroomRepository.listStudentsByClassroom(id);
 		return { classroom, students };
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e && (e as { status: number }).status === 404) {

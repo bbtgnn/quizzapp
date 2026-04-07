@@ -1,4 +1,4 @@
-import type { Student, SessionStudent } from '$lib/db/types.js';
+import type { Student, SessionStudent } from '$lib/model/types.js';
 
 export type { Student, SessionStudent };
 

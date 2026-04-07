@@ -5,7 +5,7 @@
 ## Data and persistence
 
 - **Single-device storage:** IndexedDB holds all classrooms, sessions, and attempts. **No sync** — users lose access if they clear site data or switch browsers/machines unless export/import exists and is used
-- **Schema migrations:** Dexie is at **version 1** (`src/lib/db/schema.ts`). Future schema changes need **versioned migrations** and careful testing to avoid bricking existing users’ DBs
+- **Schema migrations:** Dexie is at **version 1** (`src/lib/adapters/persistence/dexie/schema.ts`). Future schema changes need **versioned migrations** and careful testing to avoid bricking existing users’ DBs
 
 ## Security and privacy
 

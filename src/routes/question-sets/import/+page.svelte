@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createQuestionSet, createSnippet, createQuestion } from '$lib/db/index.js';
+	import { questionSetRepository } from '$lib/app/index.js';
+	import { persistSnippetFileUnderQuestionSet } from '$lib/application/question-sets/persist-snippet-file.js';
 	import { parseSnippetFile } from '$lib/importer/index.js';
 
 	type ImportState = 'idle' | 'importing' | 'done';
@@ -40,7 +41,7 @@
 		fileErrors = [];
 
 		const folderName = dirHandle.name;
-		const questionSet = await createQuestionSet(folderName);
+		const questionSet = await questionSetRepository.createQuestionSet(folderName);
 
 		for await (const [name, handle] of dirHandle) {
 			if (handle.kind !== 'file' || !name.endsWith('.json')) continue;
@@ -55,34 +56,11 @@
 				continue;
 			}
 
-			const { snippet, questions } = result.data;
-
-			const dbSnippet = await createSnippet(questionSet.id, {
-				language: snippet.language,
-				code: snippet.code,
-				...(snippet.highlight !== undefined ? { highlight: snippet.highlight } : {})
-			});
-
-			for (const q of questions) {
-				const rootQ = await createQuestion(dbSnippet.id, {
-					text: q.text,
-					correct_answer: q.correctAnswer,
-					difficulty: q.difficulty,
-					chain_parent_id: null,
-					chain_order: 0
-				});
-
-				if (q.chain) {
-					for (let i = 0; i < q.chain.length; i++) {
-						await createQuestion(dbSnippet.id, {
-							text: q.chain[i].text,
-							correct_answer: q.chain[i].correctAnswer,
-							chain_parent_id: rootQ.id,
-							chain_order: i + 1
-						});
-					}
-				}
-			}
+			await persistSnippetFileUnderQuestionSet(
+				questionSetRepository,
+				questionSet.id,
+				result.data
+			);
 
 			importedCount += 1;
 		}

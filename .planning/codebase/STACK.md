@@ -51,7 +51,7 @@
 
 **Critical:**
 
-- **dexie** (^4.4) — IndexedDB wrapper; schema in `src/lib/db/schema.ts` (`QuizAppDB`), app data is fully client-side
+- **dexie** (^4.4) — IndexedDB wrapper; schema in `src/lib/adapters/persistence/dexie/schema.ts` (`QuizAppDB`), app data is fully client-side
 - **shiki** (^4.0) — Syntax highlighting (e.g. `src/lib/components/CodeBlock.svelte`)
 
 **Adapter:**

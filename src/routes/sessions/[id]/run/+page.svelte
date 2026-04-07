@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { SessionEngine } from '$lib/session-engine/index.js';
-	import type { Snippet, Student } from '$lib/db/types.js';
+	import { SessionEngine } from '$lib/domain/session-engine/index.js';
+	import { sessionEnginePersistence } from '$lib/app/index.js';
+	import type { Snippet, Student } from '$lib/model/types.js';
 	import CodeBlock from '$lib/components/CodeBlock.svelte';
 
 	let { data } = $props();
@@ -22,7 +23,8 @@
 			data.sessionStudents,
 			data.students,
 			data.allQuestions,
-			data.attempts
+			data.attempts,
+			sessionEnginePersistence
 		);
 		tick = 0;
 		lastSettledStudentId = null;

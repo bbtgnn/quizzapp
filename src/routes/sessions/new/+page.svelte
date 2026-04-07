@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { createSession, listStudentsByClassroom, createSessionStudent } from '$lib/db/index.js';
+	import {
+		classroomRepository,
+		sessionRepository
+	} from '$lib/app/index.js';
 	let { data } = $props();
 
 	let selectedClassroomId = $state('');
@@ -41,18 +44,18 @@
 		error = null;
 
 		try {
-			const session = await createSession({
+			const session = await sessionRepository.createSession({
 				classroom_id: selectedClassroomId,
 				question_set_ids: $state.snapshot(selectedQuestionSetIds),
 				n_questions_per_student: nQuestionsPerStudent,
 				strategy_id: 'default'
 			});
 
-			const students = await listStudentsByClassroom(selectedClassroomId);
+			const students = await classroomRepository.listStudentsByClassroom(selectedClassroomId);
 
 			await Promise.all(
 				students.map((student) =>
-					createSessionStudent(session.id, student.id, nQuestionsPerStudent)
+					sessionRepository.createSessionStudent(session.id, student.id, nQuestionsPerStudent)
 				)
 			);
 

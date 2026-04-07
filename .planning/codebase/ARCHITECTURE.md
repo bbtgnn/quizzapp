@@ -1,10 +1,10 @@
 # Architecture
 
-**Analysis Date:** 2026-04-07
+**Analysis Date:** 2026-04-07 (updated for hexagonal layout)
 
 ## High-level pattern
 
-**Static SvelteKit SPA** with **client-only rendering** (`ssr = false` in `src/routes/+layout.ts`). Routes live under `src/routes/`; shared logic under `src/lib/`. **All durable state** is stored in **IndexedDB** via **Dexie** (`src/lib/db/`).
+**Static SvelteKit SPA** with **client-only rendering** (`ssr = false` in `src/routes/+layout.ts`). Routes live under `src/routes/`; shared logic under `src/lib/`. **All durable state** is stored in **IndexedDB** via **Dexie**, implemented under **`src/lib/adapters/persistence/dexie/`**. UI and loaders use **`$lib/app`** for wired repositories and services.
 
 ## Major components
 
@@ -13,22 +13,27 @@
 - **SvelteKit file-based routes** — e.g. `src/routes/+page.svelte` (home), `src/routes/classrooms/`, `src/routes/sessions/`, `src/routes/question-sets/`, `src/routes/history/`, `src/routes/settings/`
 - **Layout:** `src/routes/+layout.svelte` + `src/routes/+layout.ts` (SSR/prerender flags)
 
-### Data layer
+### Data layer (hexagonal)
 
-- **Schema:** `src/lib/db/schema.ts` — `QuizAppDB` Dexie subclass, version 1 stores
-- **Types:** `src/lib/db/types.ts`
-- **Repositories:** `src/lib/db/repositories/` — `classrooms`, `question-sets`, `sessions`, `attempts`, etc.
-- **DB entry:** `src/lib/db/index.ts` — re-exports `db` and repository operations
+- **Canonical types:** `src/lib/model/types.ts` — entity interfaces shared by ports, domain, and adapters
+- **Ports:** `src/lib/ports/*.ts` — repository interfaces and `SessionEnginePersistence`
+- **Dexie adapter:** `src/lib/adapters/persistence/dexie/` — `QuizAppDB` (`schema.ts`), repository functions (`repositories/`), adapter objects (`*-repository.adapter.ts`), backup (`backup.ts`)
+- **Composition:** `src/lib/app/` — production singleton repositories, `sessionEnginePersistence`, backup re-exports
+- **Legacy barrel:** `src/lib/db/*` — thin re-exports for backward compatibility; **prefer `$lib/app` and `$lib/model` for new code**
 
 ### Session runtime (domain logic)
 
-- **`SessionEngine`** (`src/lib/session-engine/index.ts`) — Orchestrates turn order, current question, attempts, completion; uses injectable DB callbacks (`SessionEngineOptions`) for tests
-- **Question selection:** `src/lib/question-selector/` — strategies registered in `registry.ts`, default in `strategies/default.ts`
-- **Student ordering:** `src/lib/student-orderer/` — same pattern (`registry.ts`, `strategies/default.ts`)
+- **`SessionEngine`** (`src/lib/domain/session-engine/index.ts`) — Orchestrates turn order, current question, attempts, completion; requires a **`SessionEnginePersistence`** port (wired from `$lib/app` in the UI)
+- **Question selection:** `src/lib/domain/question-selector/` — strategies registered in `registry.ts`, default in `strategies/default.ts`
+- **Student ordering:** `src/lib/domain/student-orderer/` — same pattern (`registry.ts`, `strategies/default.ts`)
+
+### Application (use cases)
+
+- **`src/lib/application/`** — Orchestration that depends on ports only (e.g. `sessions/sessions.service.ts`, `question-sets/persist-snippet-file.ts`), unit-tested with stub repositories
 
 ### Content import
 
-- **`src/lib/importer/`** — Parses/brings question-set JSON into the DB (tests in `importer/index.test.ts`)
+- **`src/lib/importer/`** — Pure JSON parsing; persistence goes through **`$lib/app`** / application helpers
 
 ### UI building blocks
 
@@ -37,9 +42,9 @@
 
 ## Data flow (typical session run)
 
-1. User opens a session route under `src/routes/sessions/` (e.g. run page loads session + students + questions from Dexie).
-2. **`SessionEngine`** computes current student/question, records **attempts** via repository/`createAttempt`.
-3. State updates persist to IndexedDB; UI reflects runes/state in Svelte components.
+1. User opens a session route under `src/routes/sessions/`; **`+page.ts`** loads via **`$lib/app`** repositories.
+2. **`SessionEngine`** receives **`sessionEnginePersistence`** and records **attempts** through that port.
+3. Dexie adapter persists to IndexedDB; UI reflects state in Svelte components.
 
 ## Entry points
 
@@ -48,9 +53,9 @@
 
 ## Extension points
 
-- **New question selection behavior:** Add strategy under `src/lib/question-selector/strategies/`, register in `registry.ts`
-- **New ordering:** Same under `student-orderer/`
-- **New entities:** Extend Dexie schema (bump version) + types + repository
+- **New question selection behavior:** Add strategy under `src/lib/domain/question-selector/strategies/`, register in `registry.ts`
+- **New ordering:** Same under `domain/student-orderer/`
+- **New entities:** Extend Dexie schema in the adapter (bump version), add types in `model/`, extend port + adapter + `$lib/app` wiring
 
 ---
 

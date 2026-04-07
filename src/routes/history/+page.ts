@@ -1,6 +1,10 @@
 import { error } from '@sveltejs/kit';
-import { listSessions, getClassroom, listAttemptsBySession } from '$lib/db/index.js';
-import type { Session } from '$lib/db/types.js';
+import {
+	attemptRepository,
+	classroomRepository,
+	sessionRepository
+} from '$lib/app/index.js';
+import type { Session } from '$lib/model/types.js';
 
 export type SessionWithDetails = Session & {
 	classroomName: string;
@@ -10,13 +14,13 @@ export type SessionWithDetails = Session & {
 
 export const load = async () => {
 	try {
-		const allSessions = await listSessions();
+		const allSessions = await sessionRepository.listSessions();
 		const completedSessions = allSessions.filter((s) => s.status === 'completed');
 
 		const withDetails: SessionWithDetails[] = await Promise.all(
 			completedSessions.map(async (s) => {
-				const classroom = await getClassroom(s.classroom_id);
-				const attempts = await listAttemptsBySession(s.id);
+				const classroom = await classroomRepository.getClassroom(s.classroom_id);
+				const attempts = await attemptRepository.listAttemptsBySession(s.id);
 				const uniqueStudents = new Set(attempts.map((a) => a.student_id));
 
 				return {

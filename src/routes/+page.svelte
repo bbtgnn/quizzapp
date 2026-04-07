@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { deleteClassroom } from '$lib/db/index.js';
+	import { classroomRepository } from '$lib/app/index.js';
 	let { data } = $props();
 
 	let deletingId = $state<string | null>(null);
@@ -16,7 +16,7 @@
 		}
 		deletingId = id;
 		try {
-			await deleteClassroom(id);
+			await classroomRepository.deleteClassroom(id);
 			await invalidateAll();
 		} finally {
 			deletingId = null;

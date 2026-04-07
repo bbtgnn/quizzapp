@@ -1,6 +1,10 @@
 import { error } from '@sveltejs/kit';
-import { listSessions, getClassroom, listSessionStudents } from '$lib/db/index.js';
-import type { Session } from '$lib/db/types.js';
+import {
+	classroomRepository,
+	listSessionsOrderedByStartedAt,
+	sessionRepository
+} from '$lib/app/index.js';
+import type { Session } from '$lib/model/types.js';
 
 export type PausedSessionView = Session & {
 	classroomName: string;
@@ -10,14 +14,14 @@ export type PausedSessionView = Session & {
 
 export const load = async () => {
 	try {
-		const allSessions = await listSessions();
+		const allSessions = await listSessionsOrderedByStartedAt(sessionRepository);
 		const paused = allSessions.filter((s) => s.status === 'paused');
 		const completedSessionsCount = allSessions.filter((s) => s.status === 'completed').length;
 
 		const enrichedPaused: PausedSessionView[] = await Promise.all(
 			paused.map(async (session) => {
-				const classroom = await getClassroom(session.classroom_id);
-				const students = await listSessionStudents(session.id);
+				const classroom = await classroomRepository.getClassroom(session.classroom_id);
+				const students = await sessionRepository.listSessionStudents(session.id);
 				const completedStudents = students.filter((s) => s.completed).length;
 				return {
 					...session,

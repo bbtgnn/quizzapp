@@ -1,5 +1,5 @@
 import type { QuestionSelectionStrategy } from '../types.js';
-import type { Attempt, Question, Student } from '$lib/db/types.js';
+import type { Attempt, Question, Student } from '$lib/model/types.js';
 
 const defaultStrategy: QuestionSelectionStrategy = {
 	pick(student: Student, attempts: Attempt[], availableQuestions: Question[]): Question {

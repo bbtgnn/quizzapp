@@ -1,20 +1,7 @@
-import type { Attempt, Question, Session, SessionStudent, Student } from '$lib/db/types.js';
-import {
-	createAttempt as defaultCreateAttempt,
-	updateSession as defaultUpdateSession,
-	updateSessionStudent as defaultUpdateSessionStudent
-} from '$lib/db/index.js';
-import { getStrategy as getQuestionStrategy } from '$lib/question-selector/registry.js';
-import { getStrategy as getStudentStrategy } from '$lib/student-orderer/registry.js';
-
-export interface SessionEngineOptions {
-	createAttempt?: (data: Omit<Attempt, 'id' | 'answered_at'>) => Promise<Attempt>;
-	updateSession?: (id: string, changes: Partial<Omit<Session, 'id'>>) => Promise<void>;
-	updateSessionStudent?: (
-		id: string,
-		changes: Partial<Omit<SessionStudent, 'id'>>
-	) => Promise<void>;
-}
+import type { Attempt, Question, Session, SessionStudent, Student } from '$lib/model/types.js';
+import type { SessionEnginePersistence } from '$lib/ports/session-engine-persistence.js';
+import { getStrategy as getQuestionStrategy } from '$lib/domain/question-selector/registry.js';
+import { getStrategy as getStudentStrategy } from '$lib/domain/student-orderer/registry.js';
 
 export class SessionEngine {
 	private readonly _session: Session;
@@ -24,9 +11,9 @@ export class SessionEngine {
 	private _orderedStudents: Student[];
 	private _currentIndex: number;
 	private _currentQuestion: Question | null;
-	private readonly _createAttempt: NonNullable<SessionEngineOptions['createAttempt']>;
-	private readonly _updateSession: NonNullable<SessionEngineOptions['updateSession']>;
-	private readonly _updateSessionStudent: NonNullable<SessionEngineOptions['updateSessionStudent']>;
+	private readonly _createAttempt: SessionEnginePersistence['createAttempt'];
+	private readonly _updateSession: SessionEnginePersistence['updateSession'];
+	private readonly _updateSessionStudent: SessionEnginePersistence['updateSessionStudent'];
 	private _chainQuestions: Question[] = [];
 	private _chainIndex: number = 0;
 	private _chainOutcomes: Array<'correct' | 'partial' | 'wrong'> = [];
@@ -38,14 +25,14 @@ export class SessionEngine {
 		students: Student[],
 		questions: Question[],
 		attempts: Attempt[],
-		options?: SessionEngineOptions
+		persistence: SessionEnginePersistence
 	) {
 		this._session = session;
 		this._questions = questions;
 		this._attempts = [...attempts];
-		this._createAttempt = options?.createAttempt ?? defaultCreateAttempt;
-		this._updateSession = options?.updateSession ?? defaultUpdateSession;
-		this._updateSessionStudent = options?.updateSessionStudent ?? defaultUpdateSessionStudent;
+		this._createAttempt = persistence.createAttempt;
+		this._updateSession = persistence.updateSession;
+		this._updateSessionStudent = persistence.updateSessionStudent;
 
 		this._sessionStudentsMap = new Map(sessionStudents.map((ss) => [ss.student_id, { ...ss }]));
 

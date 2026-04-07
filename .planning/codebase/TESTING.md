@@ -7,10 +7,10 @@
 - **Command:** `npm run test:unit` → `vitest` (see `package.json`)
 - **Full test script:** `npm run test` runs unit with `--run` then E2E
 - **Location:** Colocated tests such as:
-  - `src/lib/session-engine/session-engine.test.ts`
+  - `src/lib/domain/session-engine/session-engine.test.ts`
   - `src/lib/importer/index.test.ts`
-  - `src/lib/question-selector/strategies/default.test.ts`
-  - `src/lib/student-orderer/strategies/default.test.ts`
+  - `src/lib/domain/question-selector/strategies/default.test.ts`
+  - `src/lib/domain/student-orderer/strategies/default.test.ts`
   - `src/lib/vitest-examples/*.spec.ts` — examples (greet, Welcome component)
 
 ## Browser / component testing
@@ -30,7 +30,7 @@
 
 ## Practical guidance
 
-- **SessionEngine** is constructed with injectable DB callbacks — **prefer injecting fakes/mocks** in tests (`SessionEngineOptions`) rather than hitting IndexedDB when testing pure logic
+- **SessionEngine** requires a **`SessionEnginePersistence`** mock in tests — inject fakes rather than hitting IndexedDB when testing pure logic
 - **Dexie** in browser — for repository tests, consider in-memory or mock patterns; many tests may remain integration-style against real IndexedDB in browser Vitest if configured
 
 ---

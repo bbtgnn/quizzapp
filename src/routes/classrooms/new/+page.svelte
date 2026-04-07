@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { createClassroom, createStudent } from '$lib/db/index.js';
+	import { classroomRepository } from '$lib/app/index.js';
 
 	let classroomName = $state('');
 	let students = $state([{ id: crypto.randomUUID(), name: '' }]);
@@ -35,9 +35,11 @@
 		error = null;
 
 		try {
-			const classroom = await createClassroom(classroomName.trim());
+			const classroom = await classroomRepository.createClassroom(classroomName.trim());
 
-			await Promise.all(validStudents.map((s) => createStudent(classroom.id, s.name.trim())));
+			await Promise.all(
+				validStudents.map((s) => classroomRepository.createStudent(classroom.id, s.name.trim()))
+			);
 
 			goto('/');
 		} catch (err) {

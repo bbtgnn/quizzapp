@@ -1,10 +1,10 @@
-import { listClassrooms, listQuestionSets } from '$lib/db/index.js';
+import { classroomRepository, questionSetRepository } from '$lib/app/index.js';
 
 export const load = async () => {
 	try {
 		const [dbClassrooms, dbQuestionSets] = await Promise.all([
-			listClassrooms(),
-			listQuestionSets()
+			classroomRepository.listClassrooms(),
+			questionSetRepository.listQuestionSets()
 		]);
 		return {
 			classrooms: dbClassrooms.sort((a, b) => b.created_at - a.created_at),
