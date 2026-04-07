@@ -38,7 +38,6 @@
 | `app/` | Composition root: wired repositories, `sessionEnginePersistence`, backup exports |
 | `application/` | Use cases (orchestrate ports; tested with stubs) |
 | `domain/` | `session-engine/`, `question-selector/`, `student-orderer/` |
-| `db/` | Legacy re-exports (prefer `app/` + `model/`) |
 | `importer/` | Question set JSON parsing |
 | `components/` | Shared Svelte components |
 | `vitest-examples/` | Example tests (greet, Welcome) |
