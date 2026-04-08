@@ -21,6 +21,24 @@ const makeChainQuestion = (id: string, parentId: string | null, order: number): 
 	chain_parent_id: parentId,
 	chain_order: order
 });
+const makeMCChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
+	id,
+	question_set_id: 'qs1',
+	text: `Q ${id}`,
+	content: { type: 'code-snippet', language: 'ts', code: 'x' },
+	answer: { type: 'multiple-choice', options: ['A', 'B', 'C'], correctIndex: 0 },
+	chain_parent_id: parentId,
+	chain_order: order
+});
+const makeTFChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
+	id,
+	question_set_id: 'qs1',
+	text: `Q ${id}`,
+	content: { type: 'code-snippet', language: 'ts', code: 'x' },
+	answer: { type: 'true-false', correctAnswer: true },
+	chain_parent_id: parentId,
+	chain_order: order
+});
 const makeSessionStudent = (
 	studentId: string,
 	slotsRemaining: number,
@@ -416,6 +434,118 @@ describe('SessionEngine', () => {
 			expect(repos.createAttemptCalls).toHaveLength(1);
 			expect(repos.createAttemptCalls[0].outcome).toBe('wrong');
 			expect(engine.isComplete).toBe(true);
+		});
+
+		describe('chain questions with different answer types', () => {
+			it('MC chain all-correct → aggregate correct, single Attempt on root', async () => {
+				const students = [makeStudent('s1')];
+				const parent = makeMCChainQuestion('qp', null, 0);
+				const child = makeMCChainQuestion('qc1', 'qp', 1);
+				const session = makeSession('active', 1);
+				const sessionStudents = [makeSessionStudent('s1', 1)];
+				const repos = makeMockRepos();
+
+				const engine = new SessionEngine(
+					session,
+					sessionStudents,
+					students,
+					[parent, child],
+					[],
+					repos
+				);
+
+				expect(engine.currentQuestion?.id).toBe('qp');
+
+				await engine.recordOutcome('correct');
+				expect(engine.currentQuestion?.id).toBe('qc1');
+				expect(repos.createAttemptCalls).toHaveLength(0);
+
+				await engine.recordOutcome('correct');
+				expect(engine.isComplete).toBe(true);
+				expect(repos.createAttemptCalls).toHaveLength(1);
+				expect(repos.createAttemptCalls[0].question_id).toBe('qp');
+				expect(repos.createAttemptCalls[0].outcome).toBe('correct');
+			});
+
+			it('TF chain with one wrong → aggregate wrong', async () => {
+				const students = [makeStudent('s1')];
+				const parent = makeTFChainQuestion('qp', null, 0);
+				const child = makeTFChainQuestion('qc1', 'qp', 1);
+				const session = makeSession('active', 1);
+				const sessionStudents = [makeSessionStudent('s1', 1)];
+				const repos = makeMockRepos();
+
+				const engine = new SessionEngine(
+					session,
+					sessionStudents,
+					students,
+					[parent, child],
+					[],
+					repos
+				);
+
+				await engine.recordOutcome('correct');
+				expect(engine.currentQuestion?.id).toBe('qc1');
+
+				await engine.recordOutcome('wrong');
+				expect(engine.isComplete).toBe(true);
+				expect(repos.createAttemptCalls).toHaveLength(1);
+				expect(repos.createAttemptCalls[0].outcome).toBe('wrong');
+			});
+
+			it('mixed chain (open+MC+TF) correct/correct/wrong → aggregate wrong', async () => {
+				const students = [makeStudent('s1')];
+				const parent = makeChainQuestion('qp', null, 0); // open
+				const childMC = makeMCChainQuestion('qc1', 'qp', 1);
+				const childTF = makeTFChainQuestion('qc2', 'qp', 2);
+				const session = makeSession('active', 1);
+				const sessionStudents = [makeSessionStudent('s1', 1)];
+				const repos = makeMockRepos();
+
+				const engine = new SessionEngine(
+					session,
+					sessionStudents,
+					students,
+					[parent, childMC, childTF],
+					[],
+					repos
+				);
+
+				await engine.recordOutcome('correct');
+				await engine.recordOutcome('correct');
+				await engine.recordOutcome('wrong');
+
+				expect(repos.createAttemptCalls).toHaveLength(1);
+				expect(repos.createAttemptCalls[0].outcome).toBe('wrong');
+				expect(engine.isComplete).toBe(true);
+			});
+
+			it('mixed chain (open+MC+TF) correct/partial/correct → aggregate partial', async () => {
+				const students = [makeStudent('s1')];
+				const parent = makeChainQuestion('qp', null, 0); // open
+				const childMC = makeMCChainQuestion('qc1', 'qp', 1);
+				const childTF = makeTFChainQuestion('qc2', 'qp', 2);
+				const session = makeSession('active', 1);
+				const sessionStudents = [makeSessionStudent('s1', 1)];
+				const repos = makeMockRepos();
+
+				const engine = new SessionEngine(
+					session,
+					sessionStudents,
+					students,
+					[parent, childMC, childTF],
+					[],
+					repos
+				);
+
+				await engine.recordOutcome('correct');
+				await engine.recordOutcome('partial');
+				await engine.recordOutcome('correct');
+
+				expect(repos.createAttemptCalls).toHaveLength(1);
+				expect(repos.createAttemptCalls[0].outcome).toBe('partial');
+				expect(engine.isComplete).toBe(true);
+			});
 		});
 
 		it('chainProgress: correct values during chain, null outside chain', async () => {

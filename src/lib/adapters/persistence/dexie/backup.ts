@@ -1,7 +1,5 @@
 import { db } from './schema.js';
 
-// TODO S03: bump backup version to 2 and handle new question format
-
 export async function exportFullBackup(): Promise<void> {
 	const [
 		classrooms,
@@ -22,7 +20,7 @@ export async function exportFullBackup(): Promise<void> {
 	]);
 
 	const data = {
-		version: 1,
+		version: 2,
 		exportedAt: Date.now(),
 		classrooms,
 		students,
@@ -62,10 +60,10 @@ export async function importFullBackupFromFile(file: File): Promise<ImportBackup
 		}
 
 		const data = parsed as Record<string, unknown>;
-		if (data.version !== 1) {
+		if (data.version !== 2) {
 			return {
 				ok: false,
-				error: `Unsupported version: ${data.version}. This app supports version 1 only.`
+				error: `Unsupported version: ${data.version}. This app supports version 2 only.`
 			};
 		}
 
