@@ -40,10 +40,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 
-- [ ] 01-01-PLAN.md — Zod 4, strict schemas, error formatter, OpenAnswerConfig.referenceAnswer (MODL-01/02, D-01–D-09, D-12)
-- [ ] 01-02-PLAN.md — parseQuestionSetFile + logical→ParsedQuestionSet persistence bridge + importer/persist tests (IMPT-01)
-- [ ] 01-03-PLAN.md — migrate `question-sets/**/*.json` via maintainer script (IMPT-02, D-10/D-11)
-- [ ] 01-04-PLAN.md — validate every bundled JSON in Vitest + GitHub Actions CI (D-13, IMPT-02 guard)
+- [x] 01-01-PLAN.md — Zod 4, strict schemas, error formatter, OpenAnswerConfig.referenceAnswer (MODL-01/02, D-01–D-09, D-12)
+- [x] 01-02-PLAN.md — parseQuestionSetFile + logical→ParsedQuestionSet persistence bridge + importer/persist tests (IMPT-01)
+- [x] 01-03-PLAN.md — migrate `question-sets/**/*.json` via maintainer script (IMPT-02, D-10/D-11)
+- [x] 01-04-PLAN.md — validate every bundled JSON in Vitest + GitHub Actions CI (D-13, IMPT-02 guard)
 
 ### Phase 2: IndexedDB & persistence
 

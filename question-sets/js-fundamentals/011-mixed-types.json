@@ -1,36 +1,95 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "const data = {\n  id: 42,\n  label: \"score\",\n  values: [10, 20, 30],\n  active: false,\n  metadata: null\n};",
-		"highlight": { "startLine": 1, "endLine": 7 }
-	},
+	"name": "js-fundamentals / 011-mixed-types",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is the data type of data.id?",
-			"correctAnswer": "number",
-			"difficulty": "easy",
-			"chain": [
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const data = {\n  id: 42,\n  label: \"score\",\n  values: [10, 20, 30],\n  active: false,\n  metadata: null\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of data.id?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "number"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
+				},
 				{
 					"text": "What is the data type of data.label?",
-					"correctAnswer": "string"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "string"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
 				},
 				{
 					"text": "What is the data type of data.values?",
-					"correctAnswer": "array (of numbers)"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "array (of numbers)"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
 				},
 				{
 					"text": "What is the data type of data.active?",
-					"correctAnswer": "boolean"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "boolean"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
 				},
 				{
 					"text": "What is the data type of data.metadata?",
-					"correctAnswer": "null"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "null"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
 				}
-			]
+			],
+			"difficulty": "easy"
 		},
 		{
-			"text": "How many properties does data have?",
-			"correctAnswer": "5 (id, label, values, active, metadata)",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const data = {\n  id: 42,\n  label: \"score\",\n  values: [10, 20, 30],\n  active: false,\n  metadata: null\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many properties does data have?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "5 (id, label, values, active, metadata)"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 7
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

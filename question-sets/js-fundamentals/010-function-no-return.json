@@ -1,18 +1,51 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "function logMessage(text) {\n  console.log(text);\n}\n\nconst result = logMessage(\"hi\");",
-		"highlight": { "startLine": 5, "endLine": 5 }
-	},
+	"name": "js-fundamentals / 010-function-no-return",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is the value of result?",
-			"correctAnswer": "undefined — the function does not have a return statement, so it returns undefined by default",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function logMessage(text) {\n  console.log(text);\n}\n\nconst result = logMessage(\"hi\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the value of result?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "undefined — the function does not have a return statement, so it returns undefined by default"
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "medium"
 		},
 		{
-			"text": "Does this function have a return statement?",
-			"correctAnswer": "No",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function logMessage(text) {\n  console.log(text);\n}\n\nconst result = logMessage(\"hi\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "Does this function have a return statement?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "No"
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

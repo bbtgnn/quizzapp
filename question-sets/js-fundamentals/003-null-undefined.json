@@ -1,23 +1,74 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "let username = null;\nlet age;\nconsole.log(username);\nconsole.log(age);",
-		"highlight": { "startLine": 1, "endLine": 2 }
-	},
+	"name": "js-fundamentals / 003-null-undefined",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is the data type of username?",
-			"correctAnswer": "null (object if using typeof, but the value is null)",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let username = null;\nlet age;\nconsole.log(username);\nconsole.log(age);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of username?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "null (object if using typeof, but the value is null)"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 2
+					}
+				}
+			],
 			"difficulty": "medium"
 		},
 		{
-			"text": "What is the data type of age?",
-			"correctAnswer": "undefined",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let username = null;\nlet age;\nconsole.log(username);\nconsole.log(age);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of age?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "undefined"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 2
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What is the difference between null and undefined?",
-			"correctAnswer": "null is an intentional absence of value (set by the programmer). undefined means the variable was declared but never assigned a value.",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let username = null;\nlet age;\nconsole.log(username);\nconsole.log(age);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the difference between null and undefined?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "null is an intentional absence of value (set by the programmer). undefined means the variable was declared but never assigned a value."
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 2
+					}
+				}
+			],
 			"difficulty": "medium"
 		}
 	]

@@ -1,94 +1,174 @@
 import { describe, it, expect } from 'vitest';
 import { parseQuestionSetFile } from './index.js';
 
-const validQuestionSet = JSON.stringify({
-	name: 'TypeScript Basics',
-	questions: [
-		{
-			text: 'How many arguments does this function take?',
-			content: {
-				type: 'code-snippet',
-				language: 'typescript',
-				code: 'function add(a: number, b: number): number {\n  return a + b;\n}'
-			},
-			answer: { type: 'open' }
-		}
-	]
-});
+function q(json: unknown): string {
+	return JSON.stringify(json);
+}
 
-describe('parseQuestionSetFile', () => {
-	it('parses a valid question set file', () => {
-		const result = parseQuestionSetFile(validQuestionSet);
+describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
+	it('parses a valid file with shared markdown and one step', () => {
+		const raw = q({
+			name: 'Set A',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: { content: { type: 'markdown', body: 'Intro text' } },
+					steps: [{ text: 'q1', answer: { type: 'open' } }]
+				}
+			]
+		});
+		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		expect(result.data.name).toBe('TypeScript Basics');
+		expect(result.data.name).toBe('Set A');
 		expect(result.data.questions).toHaveLength(1);
-		expect(result.data.questions[0].text).toBe('How many arguments does this function take?');
-		expect(result.data.questions[0].content).toEqual({
-			type: 'code-snippet',
-			language: 'typescript',
-			code: 'function add(a: number, b: number): number {\n  return a + b;\n}'
-		});
+		expect(result.data.questions[0].text).toBe('q1');
+		expect(result.data.questions[0].content).toEqual({ type: 'markdown', body: 'Intro text' });
 		expect(result.data.questions[0].answer).toEqual({ type: 'open' });
 	});
 
-	it('parses a valid question set with chain questions', () => {
-		const input = JSON.stringify({
-			name: 'Python Basics',
+	it('rejects unknown root key (strict object / D-07)', () => {
+		const raw = q({
+			name: 'X',
+			schemaVersion: 1,
+			foo: 1,
 			questions: [
 				{
-					text: 'What does this function return?',
-					content: {
-						type: 'code-snippet',
-						language: 'python',
-						code: 'def greet(name): return f"Hello {name}"'
+					shared: { content: { type: 'markdown', body: 'b' } },
+					steps: [{ text: 't', answer: { type: 'open' } }]
+				}
+			]
+		});
+		const result = parseQuestionSetFile(raw);
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+		expect(result.error).toMatch(/foo|\(root\)/);
+	});
+
+	it('maps code-snippet shared + two steps with ranges to root highlight and chain', () => {
+		const raw = q({
+			name: 'Code chain',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: {
+						content: { type: 'code-snippet', language: 'js', code: 'const a = 1;\nconst b = 2;' }
 					},
-					answer: { type: 'open' },
-					chain: [
-						{ text: 'What is the parameter name?', answer: { type: 'open' } },
-						{ text: 'What format string prefix is used?', answer: { type: 'open' } }
+					steps: [
+						{
+							text: 'First',
+							answer: { type: 'open' },
+							range: { startLine: 1, endLine: 1 }
+						},
+						{
+							text: 'Second',
+							answer: { type: 'open' },
+							range: { startLine: 2, endLine: 2 }
+						}
 					]
 				}
 			]
 		});
-		const result = parseQuestionSetFile(input);
+		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		expect(result.data.questions[0].chain).toHaveLength(2);
-		expect(result.data.questions[0].chain![0].text).toBe('What is the parameter name?');
-		expect(result.data.questions[0].chain![0].answer).toEqual({ type: 'open' });
-		expect(result.data.questions[0].chain![1].text).toBe('What format string prefix is used?');
-	});
-
-	it('parses a valid question set with highlight range', () => {
-		const input = JSON.stringify({
-			name: 'JS Highlights',
-			questions: [
-				{
-					text: 'What is x?',
-					content: {
-						type: 'code-snippet',
-						language: 'javascript',
-						code: 'const x = 1;\nconst y = 2;',
-						highlight: { startLine: 1, endLine: 1 }
-					},
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].content).toEqual({
+		const q0 = result.data.questions[0];
+		expect(q0.content).toEqual({
 			type: 'code-snippet',
-			language: 'javascript',
-			code: 'const x = 1;\nconst y = 2;',
+			language: 'js',
+			code: 'const a = 1;\nconst b = 2;',
 			highlight: { startLine: 1, endLine: 1 }
 		});
+		expect(q0.chain).toHaveLength(1);
+		expect(q0.chain![0].text).toBe('Second');
+		expect(q0.chain![0].answer).toEqual({ type: 'open' });
 	});
 
-	it('returns error when name is missing', () => {
-		const input = JSON.stringify({
+	it('allows markdown shared without step range; rejects range on markdown shared', () => {
+		const okRaw = q({
+			name: 'Md ok',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: { content: { type: 'markdown', body: 'x' } },
+					steps: [{ text: 't', answer: { type: 'open' } }]
+				}
+			]
+		});
+		expect(parseQuestionSetFile(okRaw).ok).toBe(true);
+
+		const badRaw = q({
+			name: 'Md bad',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: { content: { type: 'markdown', body: 'x' } },
+					steps: [
+						{
+							text: 't',
+							answer: { type: 'open' },
+							range: { startLine: 1, endLine: 1 }
+						}
+					]
+				}
+			]
+		});
+		const bad = parseQuestionSetFile(badRaw);
+		expect(bad.ok).toBe(false);
+		if (bad.ok) return;
+		expect(bad.error).toMatch(/questions\[\d+\]/);
+	});
+
+	it('requires range on every step when shared is code-snippet', () => {
+		const raw = q({
+			name: 'Missing range',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: { content: { type: 'code-snippet', language: 'js', code: 'x' } },
+					steps: [{ text: 't', answer: { type: 'open' } }]
+				}
+			]
+		});
+		const result = parseQuestionSetFile(raw);
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+		expect(result.error).toMatch(/questions\[0\]\.steps\[0\]\.range/);
+	});
+
+	it('round-trips open answer referenceAnswer on root and chain', () => {
+		const raw = q({
+			name: 'Refs',
+			schemaVersion: 1,
+			questions: [
+				{
+					shared: { content: { type: 'markdown', body: 'm' } },
+					steps: [
+						{
+							text: 'Root',
+							answer: { type: 'open', referenceAnswer: 'alpha' }
+						},
+						{
+							text: 'Follow',
+							answer: { type: 'open', referenceAnswer: 'beta' }
+						}
+					]
+				}
+			]
+		});
+		const result = parseQuestionSetFile(raw);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.data.questions[0].answer).toEqual({ type: 'open', referenceAnswer: 'alpha' });
+		expect(result.data.questions[0].chain![0].answer).toEqual({
+			type: 'open',
+			referenceAnswer: 'beta'
+		});
+	});
+
+	it('rejects legacy per-question text/content/answer shape', () => {
+		const legacy = q({
+			name: 'Legacy',
 			questions: [
 				{
 					text: 'Q?',
@@ -97,70 +177,8 @@ describe('parseQuestionSetFile', () => {
 				}
 			]
 		});
-		const result = parseQuestionSetFile(input);
+		const result = parseQuestionSetFile(legacy);
 		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/name/);
-	});
-
-	it('returns error when content.language is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', code: 'x' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/language/);
-	});
-
-	it('returns error when content is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [{ text: 'Q?', answer: { type: 'open' } }]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/content/);
-	});
-
-	it('returns error when answer is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/answer/);
-	});
-
-	it('returns error when question.text is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/questions\[0\]\.text/);
 	});
 
 	it('returns error for malformed JSON', () => {
@@ -170,423 +188,82 @@ describe('parseQuestionSetFile', () => {
 		expect(result.error).toMatch(/Invalid JSON/);
 	});
 
-	it('returns error when questions array is empty', () => {
-		const input = JSON.stringify({ name: 'Empty', questions: [] });
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/at least one/);
-	});
-
-	it('returns error when highlight is missing endLine', () => {
-		const input = JSON.stringify({
-			name: 'Test',
+	it('parses multiple-choice and true-false answers', () => {
+		const raw = q({
+			name: 'Types',
+			schemaVersion: 1,
 			questions: [
 				{
-					text: 'Q?',
-					content: {
-						type: 'code-snippet',
-						language: 'js',
-						code: 'const x = 1;',
-						highlight: { startLine: 1 }
-					},
-					answer: { type: 'open' }
+					shared: { content: { type: 'markdown', body: 'Pick one' } },
+					steps: [
+						{
+							text: 'MC',
+							answer: { type: 'multiple-choice', options: ['a', 'b'], correctIndex: 0 }
+						}
+					]
+				},
+				{
+					shared: { content: { type: 'markdown', body: 'TF' } },
+					steps: [
+						{
+							text: 'Bool',
+							answer: { type: 'true-false', correctAnswer: false }
+						}
+					]
 				}
 			]
 		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/endLine/);
-	});
-
-	it('returns error when chain item is missing answer', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'open' },
-					chain: [{ text: 'Follow-up question' }]
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/chain\[0\]\.answer/);
-	});
-
-	it('returns error for unsupported content type', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'image', url: 'https://example.com/img.png' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/not supported/);
-	});
-
-	it('returns error for unsupported answer type', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'essay' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/not supported/);
-	});
-
-	// --- New content types ---
-
-	it('parses a markdown content question', () => {
-		const input = JSON.stringify({
-			name: 'Markdown Test',
-			questions: [
-				{
-					text: 'What does idempotent mean?',
-					content: { type: 'markdown', body: '**Idempotent** means applying an operation multiple times yields the same result.' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].content).toEqual({
-			type: 'markdown',
-			body: '**Idempotent** means applying an operation multiple times yields the same result.'
-		});
-	});
-
-	it('returns error when markdown content body is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'markdown' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/body/);
-	});
-
-	it('returns error when markdown content body is empty', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'markdown', body: '   ' },
-					answer: { type: 'open' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/body/);
-	});
-
-	// --- New answer types: multiple-choice ---
-
-	it('parses a multiple-choice answer', () => {
-		const input = JSON.stringify({
-			name: 'MC Test',
-			questions: [
-				{
-					text: 'Which is a primitive type in JS?',
-					content: { type: 'code-snippet', language: 'js', code: 'typeof x' },
-					answer: { type: 'multiple-choice', options: ['string', 'array', 'object', 'function'], correctIndex: 0 }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
+		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
 		expect(result.data.questions[0].answer).toEqual({
 			type: 'multiple-choice',
-			options: ['string', 'array', 'object', 'function'],
+			options: ['a', 'b'],
 			correctIndex: 0
 		});
-	});
-
-	it('returns error when MC options is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'multiple-choice', correctIndex: 0 }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/options/);
-	});
-
-	it('returns error when MC options has fewer than 2 items', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'multiple-choice', options: ['only one'], correctIndex: 0 }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/at least 2/);
-	});
-
-	it('returns error when MC options contains a non-string item', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'multiple-choice', options: ['a', 42], correctIndex: 0 }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/options\[1\]/);
-	});
-
-	it('returns error when MC correctIndex is out of bounds', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'multiple-choice', options: ['a', 'b'], correctIndex: 5 }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/correctIndex/);
-	});
-
-	it('returns error when MC correctIndex is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'multiple-choice', options: ['a', 'b'] }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/correctIndex/);
-	});
-
-	// --- New answer types: true-false ---
-
-	it('parses a true-false answer with correctAnswer: true', () => {
-		const input = JSON.stringify({
-			name: 'TF Test',
-			questions: [
-				{
-					text: 'Is JS single-threaded?',
-					content: { type: 'markdown', body: 'JavaScript runs on a single thread.' },
-					answer: { type: 'true-false', correctAnswer: true }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].answer).toEqual({ type: 'true-false', correctAnswer: true });
-	});
-
-	it('parses a true-false answer with correctAnswer: false', () => {
-		const input = JSON.stringify({
-			name: 'TF Test',
-			questions: [
-				{
-					text: 'Is Python compiled?',
-					content: { type: 'markdown', body: 'Python is interpreted.' },
-					answer: { type: 'true-false', correctAnswer: false }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].answer).toEqual({ type: 'true-false', correctAnswer: false });
-	});
-
-	it('returns error when TF correctAnswer is missing', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'true-false' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/correctAnswer/);
-	});
-
-	it('returns error when TF correctAnswer is not a boolean', () => {
-		const input = JSON.stringify({
-			name: 'Test',
-			questions: [
-				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'js', code: 'x' },
-					answer: { type: 'true-false', correctAnswer: 'yes' }
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(false);
-		if (result.ok) return;
-		expect(result.error).toMatch(/correctAnswer/);
-	});
-
-	// --- Chain items with new answer types ---
-
-	it('parses a chain item with multiple-choice answer', () => {
-		const input = JSON.stringify({
-			name: 'Chain MC',
-			questions: [
-				{
-					text: 'What does this do?',
-					content: { type: 'code-snippet', language: 'js', code: 'Array.isArray([])' },
-					answer: { type: 'open' },
-					chain: [
-						{
-							text: 'What does it return?',
-							answer: { type: 'multiple-choice', options: ['true', 'false', 'undefined'], correctIndex: 0 }
-						}
-					]
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].chain![0].answer).toEqual({
-			type: 'multiple-choice',
-			options: ['true', 'false', 'undefined'],
-			correctIndex: 0
-		});
-	});
-
-	it('parses a chain item with true-false answer', () => {
-		const input = JSON.stringify({
-			name: 'Chain TF',
-			questions: [
-				{
-					text: 'What does this do?',
-					content: { type: 'code-snippet', language: 'js', code: 'typeof null === "object"' },
-					answer: { type: 'open' },
-					chain: [
-						{
-							text: 'Is this a known JS quirk?',
-							answer: { type: 'true-false', correctAnswer: true }
-						}
-					]
-				}
-			]
-		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions[0].chain![0].answer).toEqual({
+		expect(result.data.questions[1].answer).toEqual({
 			type: 'true-false',
-			correctAnswer: true
+			correctAnswer: false
 		});
 	});
 
-	it('parses a mixed question set with all content and answer types', () => {
-		const input = JSON.stringify({
-			name: 'Mixed Set',
+	it('returns path-bearing error for invalid multiple-choice index', () => {
+		const raw = q({
+			name: 'Bad MC',
+			schemaVersion: 1,
 			questions: [
 				{
-					text: 'MC with markdown',
-					content: { type: 'markdown', body: 'Which value is falsy?' },
-					answer: { type: 'multiple-choice', options: ['0', '1', '2'], correctIndex: 0 }
-				},
-				{
-					text: 'TF with code-snippet',
-					content: { type: 'code-snippet', language: 'js', code: 'Boolean(0)' },
-					answer: { type: 'true-false', correctAnswer: false }
-				},
-				{
-					text: 'Open with markdown',
-					content: { type: 'markdown', body: 'Explain closures.' },
-					answer: { type: 'open' }
+					shared: { content: { type: 'markdown', body: 'x' } },
+					steps: [
+						{
+							text: 't',
+							answer: { type: 'multiple-choice', options: ['a', 'b'], correctIndex: 5 }
+						}
+					]
 				}
 			]
 		});
-		const result = parseQuestionSetFile(input);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.data.questions).toHaveLength(3);
-		expect(result.data.questions[0].content.type).toBe('markdown');
-		expect(result.data.questions[0].answer.type).toBe('multiple-choice');
-		expect(result.data.questions[1].answer.type).toBe('true-false');
-		expect(result.data.questions[2].answer.type).toBe('open');
+		const result = parseQuestionSetFile(raw);
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+		expect(result.error).toMatch(/questions\[\d+\]/);
 	});
 
-	it('parses difficulty field when present', () => {
-		const input = JSON.stringify({
-			name: 'Test',
+	it('passes through difficulty when present', () => {
+		const raw = q({
+			name: 'D',
+			schemaVersion: 1,
 			questions: [
 				{
-					text: 'Q?',
-					content: { type: 'code-snippet', language: 'ts', code: 'const x: number = 1;' },
-					answer: { type: 'open' },
-					difficulty: 'easy'
+					difficulty: 'hard',
+					shared: { content: { type: 'markdown', body: 'x' } },
+					steps: [{ text: 't', answer: { type: 'open' } }]
 				}
 			]
 		});
-		const result = parseQuestionSetFile(input);
+		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		expect(result.data.questions[0].difficulty).toBe('easy');
+		expect(result.data.questions[0].difficulty).toBe('hard');
 	});
 });

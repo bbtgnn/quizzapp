@@ -1,23 +1,74 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "const car = {\n  brand: \"Toyota\",\n  year: 2020,\n  colors: [\"white\", \"black\"]\n};\n\nconsole.log(car.brand);\nconsole.log(car.colors[1]);",
-		"highlight": { "startLine": 4, "endLine": 4 }
-	},
+	"name": "js-fundamentals / 006-object-property",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is the data type of the highlighted property (colors)?",
-			"correctAnswer": "An array (of strings)",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const car = {\n  brand: \"Toyota\",\n  year: 2020,\n  colors: [\"white\", \"black\"]\n};\n\nconsole.log(car.brand);\nconsole.log(car.colors[1]);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of the highlighted property (colors)?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "An array (of strings)"
+					},
+					"range": {
+						"startLine": 4,
+						"endLine": 4
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What does car.colors[1] return?",
-			"correctAnswer": "\"black\"",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const car = {\n  brand: \"Toyota\",\n  year: 2020,\n  colors: [\"white\", \"black\"]\n};\n\nconsole.log(car.brand);\nconsole.log(car.colors[1]);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does car.colors[1] return?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "\"black\""
+					},
+					"range": {
+						"startLine": 4,
+						"endLine": 4
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What is a property?",
-			"correctAnswer": "A property is a key-value pair that belongs to an object. The key is the name (e.g. brand), the value is the data (e.g. \"Toyota\").",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const car = {\n  brand: \"Toyota\",\n  year: 2020,\n  colors: [\"white\", \"black\"]\n};\n\nconsole.log(car.brand);\nconsole.log(car.colors[1]);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is a property?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "A property is a key-value pair that belongs to an object. The key is the name (e.g. brand), the value is the data (e.g. \"Toyota\")."
+					},
+					"range": {
+						"startLine": 4,
+						"endLine": 4
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

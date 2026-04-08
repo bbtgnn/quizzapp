@@ -1,0 +1,18 @@
+# Closes Phase 1 D-13 — validates question-sets JSON in CI.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      # Node/server project only — browser tests need Playwright browsers locally.
+      - run: bun run test:unit -- --run --project server

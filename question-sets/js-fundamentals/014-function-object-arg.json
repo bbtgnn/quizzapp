@@ -1,28 +1,73 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "function describe(person) {\n  return person.name + \" is \" + person.age + \" years old.\";\n}\n\nconst output = describe({ name: \"Eve\", age: 30 });",
-		"highlight": { "startLine": 5, "endLine": 5 }
-	},
+	"name": "js-fundamentals / 014-function-object-arg",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "How many arguments does describe take?",
-			"correctAnswer": "1 (person)",
-			"difficulty": "easy",
-			"chain": [
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function describe(person) {\n  return person.name + \" is \" + person.age + \" years old.\";\n}\n\nconst output = describe({ name: \"Eve\", age: 30 });"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many arguments does describe take?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "1 (person)"
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
+				},
 				{
 					"text": "What is the data type of that argument?",
-					"correctAnswer": "An object"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "An object"
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
 				},
 				{
 					"text": "What properties does the object passed to describe have?",
-					"correctAnswer": "name and age"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "name and age"
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
 				}
-			]
+			],
+			"difficulty": "easy"
 		},
 		{
-			"text": "What does describe({ name: \"Eve\", age: 30 }) return?",
-			"correctAnswer": "\"Eve is 30 years old.\"",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function describe(person) {\n  return person.name + \" is \" + person.age + \" years old.\";\n}\n\nconst output = describe({ name: \"Eve\", age: 30 });"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does describe({ name: \"Eve\", age: 30 }) return?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "\"Eve is 30 years old.\""
+					},
+					"range": {
+						"startLine": 5,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

@@ -1,28 +1,97 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);",
-		"highlight": { "startLine": 1, "endLine": 1 }
-	},
+	"name": "js-fundamentals / 004-array",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is colors?",
-			"correctAnswer": "An array",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is colors?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "An array"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What does colors[0] return?",
-			"correctAnswer": "\"red\"",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does colors[0] return?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "\"red\""
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What does colors.length return?",
-			"correctAnswer": "3",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does colors.length return?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "3"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "If you run typeof colors, what do you get?",
-			"correctAnswer": "\"object\" — arrays are technically objects in JavaScript",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const colors = [\"red\", \"green\", \"blue\"];\nconsole.log(colors[0]);\nconsole.log(colors.length);"
+				}
+			},
+			"steps": [
+				{
+					"text": "If you run typeof colors, what do you get?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "\"object\" — arrays are technically objects in JavaScript"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "medium"
 		}
 	]

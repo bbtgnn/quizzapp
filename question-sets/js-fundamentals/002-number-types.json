@@ -1,28 +1,97 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;",
-		"highlight": { "startLine": 1, "endLine": 1 }
-	},
+	"name": "js-fundamentals / 002-number-types",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is the data type of price?",
-			"correctAnswer": "number",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of price?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "number"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What is the data type of quantity?",
-			"correctAnswer": "number",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of quantity?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "number"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What is the data type of inStock?",
-			"correctAnswer": "boolean",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is the data type of inStock?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "boolean"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "In JavaScript, are 9.99 and 3 the same data type?",
-			"correctAnswer": "Yes, both are number. JavaScript does not distinguish between integers and floats.",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "let price = 9.99;\nlet quantity = 3;\nlet inStock = true;"
+				}
+			},
+			"steps": [
+				{
+					"text": "In JavaScript, are 9.99 and 3 the same data type?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "Yes, both are number. JavaScript does not distinguish between integers and floats."
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 1
+					}
+				}
+			],
 			"difficulty": "medium"
 		}
 	]

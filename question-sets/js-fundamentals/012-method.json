@@ -1,28 +1,97 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};",
-		"highlight": { "startLine": 3, "endLine": 5 }
-	},
+	"name": "js-fundamentals / 012-method",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is add in this code?",
-			"correctAnswer": "A method — a function that is a property of an object",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is add in this code?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "A method — a function that is a property of an object"
+					},
+					"range": {
+						"startLine": 3,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "medium"
 		},
 		{
-			"text": "What does this refer to inside the add method?",
-			"correctAnswer": "The calculator object",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does this refer to inside the add method?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "The calculator object"
+					},
+					"range": {
+						"startLine": 3,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "medium"
 		},
 		{
-			"text": "How many arguments does the add method take?",
-			"correctAnswer": "1 (n)",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many arguments does the add method take?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "1 (n)"
+					},
+					"range": {
+						"startLine": 3,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "How many arguments does the reset method take?",
-			"correctAnswer": "0",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const calculator = {\n  value: 0,\n  add: function(n) {\n    this.value += n;\n  },\n  reset: function() {\n    this.value = 0;\n  }\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many arguments does the reset method take?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "0"
+					},
+					"range": {
+						"startLine": 3,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

@@ -1,34 +1,108 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "function greet(name) {\n  return \"Hello, \" + name + \"!\";\n}\n\nconst message = greet(\"Bob\");",
-		"highlight": { "startLine": 1, "endLine": 3 }
-	},
+	"name": "js-fundamentals / 007-function-basics",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is greet?",
-			"correctAnswer": "A function",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function greet(name) {\n  return \"Hello, \" + name + \"!\";\n}\n\nconst message = greet(\"Bob\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is greet?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "A function"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 3
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "How many arguments does greet take?",
-			"correctAnswer": "1",
-			"difficulty": "easy",
-			"chain": [
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function greet(name) {\n  return \"Hello, \" + name + \"!\";\n}\n\nconst message = greet(\"Bob\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many arguments does greet take?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "1"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 3
+					}
+				},
 				{
 					"text": "What is the name of that argument?",
-					"correctAnswer": "name"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "name"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 3
+					}
 				}
-			]
-		},
-		{
-			"text": "What does greet(\"Bob\") return?",
-			"correctAnswer": "\"Hello, Bob!\"",
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "What keyword is used to send a value back from a function?",
-			"correctAnswer": "return",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function greet(name) {\n  return \"Hello, \" + name + \"!\";\n}\n\nconst message = greet(\"Bob\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "What does greet(\"Bob\") return?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "\"Hello, Bob!\""
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 3
+					}
+				}
+			],
+			"difficulty": "easy"
+		},
+		{
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "function greet(name) {\n  return \"Hello, \" + name + \"!\";\n}\n\nconst message = greet(\"Bob\");"
+				}
+			},
+			"steps": [
+				{
+					"text": "What keyword is used to send a value back from a function?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "return"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 3
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]

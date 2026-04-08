@@ -36,6 +36,8 @@ export type ContentConfig = CodeSnippetContent | MarkdownContent;
 
 export interface OpenAnswerConfig {
 	type: 'open';
+	/** Teacher reference / expected wording for open questions (import D-12); scoring unchanged. */
+	referenceAnswer?: string;
 }
 
 export interface MCAnswerConfig {

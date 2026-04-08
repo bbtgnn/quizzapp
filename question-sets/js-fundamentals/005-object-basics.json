@@ -1,37 +1,107 @@
 {
-	"snippet": {
-		"language": "javascript",
-		"code": "const student = {\n  name: \"Alice\",\n  age: 22,\n  enrolled: true\n};",
-		"highlight": { "startLine": 1, "endLine": 5 }
-	},
+	"name": "js-fundamentals / 005-object-basics",
+	"schemaVersion": 1,
 	"questions": [
 		{
-			"text": "What is student?",
-			"correctAnswer": "An object",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const student = {\n  name: \"Alice\",\n  age: 22,\n  enrolled: true\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "What is student?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "An object"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		},
 		{
-			"text": "How many properties does this object have?",
-			"correctAnswer": "3 (name, age, enrolled)",
-			"difficulty": "easy",
-			"chain": [
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const student = {\n  name: \"Alice\",\n  age: 22,\n  enrolled: true\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "How many properties does this object have?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "3 (name, age, enrolled)"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
+				},
 				{
 					"text": "Name all three properties.",
-					"correctAnswer": "name, age, enrolled"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "name, age, enrolled"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
 				},
 				{
 					"text": "What is the data type of the age property?",
-					"correctAnswer": "number"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "number"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
 				},
 				{
 					"text": "What is the data type of the enrolled property?",
-					"correctAnswer": "boolean"
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "boolean"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
 				}
-			]
+			],
+			"difficulty": "easy"
 		},
 		{
-			"text": "How do you access the name property?",
-			"correctAnswer": "student.name (dot notation) or student[\"name\"] (bracket notation)",
+			"shared": {
+				"content": {
+					"type": "code-snippet",
+					"language": "javascript",
+					"code": "const student = {\n  name: \"Alice\",\n  age: 22,\n  enrolled: true\n};"
+				}
+			},
+			"steps": [
+				{
+					"text": "How do you access the name property?",
+					"answer": {
+						"type": "open",
+						"referenceAnswer": "student.name (dot notation) or student[\"name\"] (bracket notation)"
+					},
+					"range": {
+						"startLine": 1,
+						"endLine": 5
+					}
+				}
+			],
 			"difficulty": "easy"
 		}
 	]
