@@ -1,0 +1,214 @@
+<!-- gsd-project-start source:PROJECT.md -->
+## Project
+
+**Quizzapp — multi-step questions milestone**
+
+A **browser-only** quiz application for teachers: **classrooms**, **students**, **imported question sets**, and **live sessions** with a **SessionEngine** that drives turn order and scoring. The stack is **SvelteKit** (client-only routes), **IndexedDB via Dexie**, and a **ports-and-adapters** boundary around persistence. This milestone refactors how “multi-part” prompts are modeled so authors think in **one logical question** (optionally **multi-step**) instead of **linked chain rows**.
+
+**Core Value:** **Teachers can run fair, understandable live quizzes** where each **drawn item** is one clear unit in their head—possibly several steps on screen—without a separate “chain question” concept complicating the model, import format, or session logic.
+
+### Constraints
+
+- **Tech stack:** Stay on current **SvelteKit + Dexie + TypeScript** patterns; keep **SessionEngine** and ports testable.
+- **Data:** Accept **IndexedDB wipe** for this milestone; bundled JSON must remain valid after migration.
+- **Compatibility:** Old chain-based JSON **does not** need to load as-is after cutover if bundled sets are migrated in-repo.
+<!-- gsd-project-end -->
+
+<!-- gsd-stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Languages
+- TypeScript (5.9.x per `package.json`) — application source under `src/`, tests, config (`vite.config.ts`, `playwright.config.ts`).
+- JavaScript — `svelte.config.js`, `eslint.config.js` (ESM).
+- JSON — question set content in `question-sets/` and backup/export payloads (`src/lib/adapters/persistence/dexie/backup.ts`).
+- CSS — `src/routes/layout.css` (Tailwind v4 entry via `@import 'tailwindcss'`).
+## Runtime
+- **Browser** — primary runtime for the built app: client-only SvelteKit (`src/routes/+layout.ts` sets `ssr = false`, `prerender = true`).
+- **Node.js** — dev server (Vite), build (`vite build`), Vitest (node project + browser project), Playwright test runner.
+- **bun** — project convention (`CLAUDE.md`, `AGENTS.md`); lockfile: `bun.lock` present.
+- `package.json` scripts use `npm run` for some commands (e.g. `test`); either npm or bun can invoke scripts when compatible.
+## Frameworks
+- **SvelteKit** (^2.50.2) — routing, `$app/*` imports, build pipeline (`@sveltejs/kit`).
+- **Svelte** (^5.54.0) — UI with runes (`svelte.config.js` enables runes for app code).
+- **Vite** (^7.3.1) — bundler and dev server (`vite.config.ts`).
+- **`@sveltejs/adapter-static`** (^3.0.10) — static output; `svelte.config.js` uses `adapter({ fallback: 'index.html' })` and `prerender: { handleUnseenRoutes: 'ignore' }` for SPA-style hosting.
+- **Vitest** (^4.1.0) — unit/integration tests; config embedded in `vite.config.ts` with two projects:
+- **Playwright** (^1.58.2) — E2E (`playwright.config.ts`: `testMatch: '**/*.e2e.{ts,js}'`, web server `npm run build && npm run preview` on port 4173).
+- **@tailwindcss/vite** (^4.1.18) + **tailwindcss** (^4.1.18) — styling; plugins in `src/routes/layout.css`: `@tailwindcss/forms`, `@tailwindcss/typography`.
+- **typescript-eslint**, **eslint** (^10), **eslint-plugin-svelte** — linting (`eslint.config.js`).
+- **prettier** + **prettier-plugin-svelte** + **prettier-plugin-tailwindcss** — formatting (`.prettierrc`).
+- **svelte-check** — type/check pipeline (`package.json` script `check`).
+## Key Dependencies
+- **dexie** (^4.4.2) — IndexedDB wrapper; schema in `src/lib/adapters/persistence/dexie/schema.ts`, repositories under `src/lib/adapters/persistence/dexie/`.
+- **marked** (^18.0.0) — Markdown to HTML in `src/lib/components/MarkdownContent.svelte`.
+- **shiki** (^4.0.2) — syntax highlighting in `src/lib/components/CodeBlock.svelte` (`createHighlighter`, themes/langs configured in component).
+- **@sveltejs/vite-plugin-svelte** — bridges Svelte + Vite.
+- **@types/node** — Node typings for config and tests.
+## Configuration
+- No `import.meta.env` or `process.env` usage under `src/` for app configuration — the app does not depend on build-time public env vars for core behavior.
+- `.env` files: not enumerated here; if present, treat as local-only (see project `.gitignore`).
+- `svelte.config.js` — Kit + adapter-static + Svelte compiler runes.
+- `vite.config.ts` — plugins: `tailwindcss()`, `sveltekit()`; Vitest projects and browser test includes/excludes.
+- `tsconfig.json` — extends `.svelte-kit/tsconfig.json`; strict TypeScript, `moduleResolution: "bundler"`.
+- `playwright.config.ts` — E2E webServer and test file pattern.
+## Platform Requirements
+- Node.js compatible with Vite 7, Vitest 4, Playwright 1.58, and SvelteKit 2 (use current LTS; no `engines` field or `.nvmrc` in repo).
+- **bun** recommended for install/scripts per project docs.
+- Chromium (bundled with Playwright) for Vitest browser tests and Playwright E2E.
+- **Static file hosting** — output is a prerendered/client SPA suitable for any static host (CDN, object storage + HTTPS, GitHub Pages, etc.); no server-side API routes (`+server.ts` not present).
+<!-- gsd-stack-end -->
+
+<!-- gsd-conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## Naming Patterns
+- **Svelte components:** PascalCase — e.g. `CodeBlock.svelte`, `MarkdownContent.svelte` in `src/lib/components/`.
+- **Routes:** SvelteKit file-based routing — `+page.svelte`, `+page.ts`, `+layout.svelte` under `src/routes/`.
+- **Domain / application / data:** kebab-case TypeScript modules — e.g. `classrooms-index.ts`, `persist-question-set.ts`, `sessions.service.ts`.
+- **Adapters:** `*-repository.adapter.ts` under `src/lib/adapters/persistence/dexie/`.
+- **Dexie table modules:** short names in `src/lib/adapters/persistence/dexie/repositories/` — e.g. `classrooms.ts`, `sessions.ts`.
+- **Ports:** `*-repository.ts` or descriptive port names — e.g. `src/lib/ports/session-repository.ts`, `src/lib/ports/session-engine-persistence.ts`.
+- **Co-located tests:** same directory as source, suffix `.test.ts` or `.spec.ts` — e.g. `session-engine.test.ts` next to `index.ts`.
+- **camelCase** for functions and methods — e.g. `parseQuestionSetFile`, `loadClassroomsIndex`, `listSessionsOrderedByStartedAt`.
+- **camelCase** for locals and parameters.
+- **snake_case** for persisted / API-shaped fields matching the data model — e.g. `classroom_id`, `started_at`, `question_set_ids` in `src/lib/model/types.ts`.
+- **PascalCase** for interfaces and type aliases — e.g. `ParseResult`, `ParsedQuestionSet`, `SessionRepository`.
+- **Discriminated unions** for outcomes — e.g. `ParseResult` in `src/lib/importer/index.ts`: `{ ok: true; data: ... } | { ok: false; error: string }`.
+## Code Style
+- **Prettier** — config: `.prettierrc`
+- **Key settings:** tabs (`useTabs: true`), single quotes, **no trailing commas** (`trailingComma: "none"`), `printWidth: 100`.
+- **Plugins:** `prettier-plugin-svelte`, `prettier-plugin-tailwindcss` (Tailwind class sorting); Svelte parser override for `*.svelte`.
+- **Tailwind stylesheet:** referenced for Prettier — `./src/routes/layout.css`.
+- **ESLint** flat config — `eslint.config.js`
+- **Stacks:** `@eslint/js` recommended, `typescript-eslint` recommended, `eslint-plugin-svelte` recommended, `eslint-config-prettier` (disables conflicting formatting rules).
+- **Svelte:** `parserOptions` with `projectService: true` and `svelteConfig` from `svelte.config.js` for `*.svelte`, `*.svelte.ts`, `*.svelte.js`.
+- **Globals:** browser + Node (`globals.browser`, `globals.node`).
+- **Explicit rule:** `no-undef` off (TypeScript owns undefined checks per project policy in `eslint.config.js`).
+## Import Organization
+- **`$lib`** → `src/lib` (SvelteKit default).
+- No custom top-level aliases beyond Kit’s generated config; see comment in `tsconfig.json`.
+## Error Handling
+- **Parse / validation (pure logic):** return a **result object** with `ok` discriminant — see `ParseResult` in `src/lib/importer/index.ts` and backup import flow in `src/lib/adapters/persistence/dexie/backup.ts` (`ok` / `error` / `cancelled`).
+- **Tests for failures:** assert `result.ok === false` and match `error` strings with `toMatch(/.../)` — see `src/lib/importer/index.test.ts`.
+- **Invariant violations (domain):** `throw new Error(...)` for unknown strategy id or empty pools — e.g. `src/lib/domain/question-selector/registry.ts`, `src/lib/domain/student-orderer/registry.ts`, `src/lib/domain/question-selector/strategies/default.ts`.
+- **Loaders and UI (`+page.ts`, `+page.svelte`):** failures often logged with **`console.error`** and user-facing state (e.g. error messages in page data); examples in `src/routes/+page.ts`, `src/routes/classrooms/[id]/+page.svelte`, `src/lib/components/CodeBlock.svelte`.
+## Logging
+- **`console.error`** with a short context prefix — e.g. `'Failed to load classrooms:'`, `'Failed to initialize Shiki:'` — see `src/routes/*/+page.ts` and `src/lib/components/CodeBlock.svelte`.
+## Comments
+- Sparse inline comments for non-obvious behavior — e.g. section headers in large test files (`// --- New content types ---` in `src/lib/importer/index.test.ts`), or “inherited from parent” in `persist-question-set.test.ts`.
+- Not used project-wide; types carry documentation via TypeScript interfaces and explicit union tags.
+## Function Design
+## Module Design
+<!-- gsd-conventions-end -->
+
+<!-- gsd-architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+## Pattern Overview
+- All UI routes run in the browser: root layout sets `ssr = false` and `prerender = true` in `src/routes/+layout.ts`.
+- Static hosting via `@sveltejs/adapter-static` with SPA fallback (`fallback: 'index.html'`) in `svelte.config.js`.
+- Persistence is **IndexedDB** through **Dexie**; repository interfaces in `src/lib/ports/` are implemented by adapters under `src/lib/adapters/persistence/dexie/`.
+- Session runtime logic lives in `SessionEngine` (`src/lib/domain/session-engine/index.ts`) and stays independent of UI; pages inject `SessionEnginePersistence` from `src/lib/app/session-engine-persistence.ts`.
+## Layers
+- Purpose: File-based routes, `load` functions for data, Svelte 5 components for UI and local state.
+- Location: `src/routes/`
+- Contains: `+page.ts` / `+page.svelte`, `+layout.svelte`, `+error.svelte`, route-specific logic (e.g. keyboard handling on run page).
+- Depends on: `$lib/app` (wired repositories and persistence), `$lib/domain`, `$lib/components`, `$app/*` navigation helpers.
+- Used by: Browser navigation only (no custom `hooks.server.ts` in this repo).
+- Purpose: Orchestrate repositories and domain inputs for specific user flows (thin services).
+- Location: `src/lib/application/`
+- Contains: e.g. `sessions.service.ts` (ordering sessions for lists), `persist-question-set.ts` (persist parsed imports).
+- Depends on: `src/lib/ports/*`, `src/lib/importer/*`, `src/lib/model/types.ts`.
+- Used by: Route loaders and pages that call exported functions.
+- Purpose: Pure (or persistence-port-driven) rules for quiz sessions and strategy selection.
+- Location: `src/lib/domain/`
+- Contains: `SessionEngine` class; `question-selector/` and `student-orderer/` with `registry.ts` and `strategies/default.ts`; unit tests alongside.
+- Depends on: `src/lib/model/types.ts`, `src/lib/ports/session-engine-persistence.ts` (interface only, injected at construction).
+- Used by: Run page (`src/routes/sessions/[id]/run/+page.svelte`) and tests.
+- Purpose: Stable contracts for persistence and engine side effects; enables test doubles and future storage swaps.
+- Location: `src/lib/ports/`
+- Contains: `session-repository.ts`, `classroom-repository.ts`, `question-set-repository.ts`, `attempt-repository.ts`, `session-engine-persistence.ts`.
+- Depends on: `src/lib/model/types.ts` only.
+- Used by: Adapters, application layer, `SessionEngine`, and route loaders typed against repositories.
+- Purpose: Dexie/IndexedDB implementations of ports; schema versioning; backup import/export.
+- Location: `src/lib/adapters/persistence/dexie/`
+- Contains: `schema.ts` (`QuizAppDB`), `*-repository.adapter.ts`, `repositories/*.ts` table helpers, `backup.ts`.
+- Depends on: Dexie, model types, ports.
+- Used by: `src/lib/app/repositories.ts` (composition root).
+- Purpose: Single place to bind default adapters to port types and export facades for routes and backup.
+- Location: `src/lib/app/`
+- Contains: `repositories.ts`, `session-engine-persistence.ts`, `backup.ts` (re-exports), `index.ts` barrel.
+- Depends on: adapters and ports.
+- Used by: Route `load` functions and pages importing from `$lib/app/index.js`.
+- Purpose: Shared TypeScript interfaces for entities and content/answer discriminated unions.
+- Location: `src/lib/model/types.ts`
+- Contains: `Classroom`, `Student`, `QuestionSet`, `Question`, `Session`, `SessionStudent`, `Attempt`, content/answer config types.
+- Depends on: Nothing (types only).
+- Used by: Ports, domain, adapters, importer, UI.
+- Purpose: Parse external question-set JSON into `ParsedQuestionSet` for persistence.
+- Location: `src/lib/importer/index.ts`
+- Contains: Pure parsing and validation-style error strings (`ParseResult`).
+- Used by: Import UI and `persistQuestionSet` in `src/lib/application/question-sets/persist-question-set.ts`.
+- Purpose: Reusable async functions that take a repository port and return shaped data for pages.
+- Location: `src/lib/data/loaders/` (e.g. `classrooms-index.ts`)
+- Depends on: Ports and model types.
+- Used by: Route `+page.ts` files (passing concrete repos from `$lib/app`).
+## Data Flow
+- **Server/load state:** SvelteKit `load` return values (no shared server store; SSR is off).
+- **Client UI state:** Svelte 5 runes (`$state`, `$derived`, `$effect`) in components; session run page keeps engine instance and interaction flags locally.
+## Key Abstractions
+- Purpose: CRUD-style boundaries per aggregate (sessions, classrooms, question sets, attempts).
+- Examples: `src/lib/ports/session-repository.ts`, `src/lib/ports/classroom-repository.ts`, `src/lib/ports/question-set-repository.ts`, `src/lib/ports/attempt-repository.ts`
+- Pattern: Async interface methods returning model types; implementations in `src/lib/adapters/persistence/dexie/*-repository.adapter.ts`.
+- Purpose: Narrow port for what `SessionEngine` needs to persist (attempts, session status, session-student progress) without depending on full repositories.
+- Examples: `src/lib/ports/session-engine-persistence.ts`, implementation wiring in `src/lib/app/session-engine-persistence.ts`
+- Pattern: Object of functions bound to concrete adapters; `createSessionEnginePersistence` for tests/overrides.
+- Purpose: Encapsulate turn order, question chains, slot consumption, and completion transitions for a live session.
+- Examples: `src/lib/domain/session-engine/index.ts`
+- Pattern: Class holding in-memory state; async methods call persistence port; question picking uses `getStrategy` from `src/lib/domain/question-selector/registry.ts`, student ordering uses `src/lib/domain/student-orderer/registry.ts`.
+- Purpose: Map string `strategy_id` (on `Session`) to swappable algorithms.
+- Examples: `src/lib/domain/question-selector/registry.ts`, `src/lib/domain/student-orderer/registry.ts` with `strategies/default.ts` in each.
+- Pattern: Module-level `Map` with `getStrategy` / `registerStrategy`.
+## Entry Points
+- Location: `src/app.html` (document shell), `src/routes/+layout.svelte` (root layout, global CSS import), `src/routes/+layout.ts` (SSR/prerender flags)
+- Triggers: User opens deployed static site or `vite dev`
+- Responsibilities: Mount router, apply layout, run route loads and components
+- Location: `vite.config.ts`, `svelte.config.js`
+- Triggers: `bun run build` / `vite build`
+- Responsibilities: Bundle client; tests also extend this config in `vite.config.ts` (Vitest projects)
+- Location: `src/lib/app/repositories.ts`
+- Triggers: First import from `$lib/app` in any module
+- Responsibilities: Export singleton Dexie-backed repositories and `createRepositories()` for tests
+## Error Handling
+- Guard missing `params` and missing entities with `error(404, { message: '...' })` (e.g. `src/routes/classrooms/[id]/+page.ts`, `src/routes/sessions/[id]/run/+page.ts`).
+- Preserve already-thrown HTTP errors by checking `status` on caught values before mapping to 500.
+## Cross-Cutting Concerns
+<!-- gsd-architecture-end -->
+
+<!-- gsd-skills-start source:skills/ -->
+## Project Skills
+
+No project skills found. Add skills to any of: `.cursor/skills/`, `.agents/skills/`, `.cursor/skills/`, or `.github/skills/` with a `SKILL.md` index file.
+<!-- gsd-skills-end -->
+
+<!-- gsd-workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- gsd-workflow-end -->
+
+
+
+<!-- gsd-profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- gsd-profile-end -->

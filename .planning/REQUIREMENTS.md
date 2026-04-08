@@ -66,29 +66,29 @@ Which phases cover which requirements — updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MODL-01 | — | Pending |
-| MODL-02 | — | Pending |
-| IMPT-01 | — | Pending |
-| IMPT-02 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| SESS-01 | — | Pending |
-| SESS-02 | — | Pending |
-| SESS-03 | — | Pending |
-| SESS-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| VER-01 | — | Pending |
-| VER-02 | — | Pending |
-| VER-03 | — | Pending |
+| MODL-01 | Phase 1 | Pending |
+| MODL-02 | Phase 1 | Pending |
+| IMPT-01 | Phase 1 | Pending |
+| IMPT-02 | Phase 1 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| SESS-01 | Phase 3 | Pending |
+| SESS-02 | Phase 3 | Pending |
+| SESS-03 | Phase 3 | Pending |
+| SESS-04 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| VER-01 | Phase 5 | Pending |
+| VER-02 | Phase 5 | Pending |
+| VER-03 | Phase 5 | Pending |
 
 **Coverage:**
 
 - v1 requirements: 16 total  
-- Mapped to phases: 0  
-- Unmapped: 16 (roadmap pending)
+- Mapped to phases: 16  
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-09*  
