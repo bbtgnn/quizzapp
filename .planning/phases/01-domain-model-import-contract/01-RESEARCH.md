@@ -304,22 +304,13 @@ const answerConfig = z.discriminatedUnion('type', [
 
 **If A2 is wrong:** Search for static imports of `question-sets/` and include them in IMPT-02 scope.
 
-## Open questions
+## Open questions (RESOLVED — planning 2026-04-09)
 
-1. **Top-level `name` for migrated bundled files**
-   - **What we know:** D-01 requires `name`; legacy files have no `name` [VERIFIED: sample JSON].
-   - **What’s unclear:** Use filename stem, folder + filename, or human-curated string?
-   - **Recommendation:** Default to **`js-fundamentals / {fileStem}`** or similar; document in migration script README.
+1. **Top-level `name` for migrated bundled files** — **RESOLVED:** Plan `01-03` (`scripts/migrate-question-sets.ts`) derives `name` from folder + file stem per D-01; documented in script/README in that plan.
 
-2. **Phase 1 persistence strategy**
-   - **What we know:** CONTEXT defers persistence refactor; import UI persists immediately [VERIFIED: `import/+page.svelte`].
-   - **What’s unclear:** Adapter to chain rows vs. minimal type changes only.
-   - **Recommendation:** Explicit plan task: “bridge logical `steps[]` → current `persistQuestionSet` input shape” unless Phase 2 lands in same execution wave.
+2. **Phase 1 persistence strategy** — **RESOLVED:** Plan `01-02` implements `logical-to-parsed-question-set.ts` bridge: `steps[]` → root + `chain[]` for unchanged `persistQuestionSet` until Phase 2.
 
-3. **Optional `question` alias for `text`**
-   - **What we know:** Discretion allows alias + transform.
-   - **What’s unclear:** Whether authors prefer `question` in JSON.
-   - **Recommendation:** If added, use `.transform` / `preprocess` once at step schema; keep canonical `text` in inferred type.
+3. **Optional `question` alias for `text`** — **RESOLVED:** Plan `01-01` Task 3 chooses canonical **`text`** only for v1 JSON (no `question` alias); discretion closed to reduce schema surface.
 
 ## Environment availability
 
