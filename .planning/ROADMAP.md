@@ -36,7 +36,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 3. **Imported JSON** is **rejected or accepted at the import boundary** via runtime validation aligned with TypeScript (e.g. Zod)—invalid files do not silently persist.
 4. **All bundled** files under `question-sets/` are **in the new format** and **import successfully** through the importer.
 
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+
+- [ ] 01-01-PLAN.md — Zod 4, strict schemas, error formatter, OpenAnswerConfig.referenceAnswer (MODL-01/02, D-01–D-09, D-12)
+- [ ] 01-02-PLAN.md — parseQuestionSetFile + logical→ParsedQuestionSet persistence bridge + importer/persist tests (IMPT-01)
+- [ ] 01-03-PLAN.md — migrate `question-sets/**/*.json` via maintainer script (IMPT-02, D-10/D-11)
+- [ ] 01-04-PLAN.md — validate every bundled JSON in Vitest + GitHub Actions CI (D-13, IMPT-02 guard)
 
 ### Phase 2: IndexedDB & persistence
 
@@ -113,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Domain model & import contract | 0/TBD | Not started | - |
+| 1. Domain model & import contract | 0/4 | Not started | - |
 | 2. IndexedDB & persistence | 0/TBD | Not started | - |
 | 3. Session engine & aggregate scoring | 0/TBD | Not started | - |
 | 4. Live session run UI | 0/TBD | Not started | - |
