@@ -14,8 +14,8 @@ const makeQuestion = (id: string): Question => ({
 	text: `Question ${id}`,
 	content: { type: 'code-snippet', language: 'ts', code: 'x' },
 	answer: { type: 'open' },
-	chain_parent_id: null,
-	chain_order: 0
+	shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+	steps: [{ text: `Question ${id}`, answer: { type: 'open' } }]
 });
 
 const makeAttempt = (

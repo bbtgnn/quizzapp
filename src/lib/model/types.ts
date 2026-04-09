@@ -58,12 +58,17 @@ export type AnswerConfig = OpenAnswerConfig | MCAnswerConfig | TFAnswerConfig;
 export interface Question {
 	id: string;
 	question_set_id: string;
-	text: string;
-	content: ContentConfig;
-	answer: AnswerConfig;
+	shared?: { content: ContentConfig };
+	steps: Array<{
+		text: string;
+		answer: AnswerConfig;
+		range?: { startLine: number; endLine: number };
+	}>;
+	// Transitional read fields while session/runtime code migrates to step-based access.
+	text?: string;
+	content?: ContentConfig;
+	answer?: AnswerConfig;
 	difficulty?: string;
-	chain_parent_id: string | null;
-	chain_order: number;
 }
 
 export interface Session {

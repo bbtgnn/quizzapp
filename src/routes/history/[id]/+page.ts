@@ -35,7 +35,10 @@ export const load = async ({ params }) => {
 					.filter((a) => a.student_id === student.id)
 					.map((a) => ({
 						...a,
-						questionText: questionsMap.get(a.question_id)?.text || 'Unknown Question'
+						questionText:
+							questionsMap.get(a.question_id)?.steps[0]?.text ||
+							questionsMap.get(a.question_id)?.text ||
+							'Unknown Question'
 					}))
 					.sort((a, b) => a.answered_at - b.answered_at);
 

@@ -9,8 +9,8 @@ const makeQuestion = (id: string): Question => ({
 	text: `Q ${id}`,
 	content: { type: 'code-snippet', language: 'ts', code: 'x' },
 	answer: { type: 'open' },
-	chain_parent_id: null,
-	chain_order: 0
+	shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+	steps: [{ text: `Q ${id}`, answer: { type: 'open' } }]
 });
 const makeChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
 	id,
@@ -18,8 +18,8 @@ const makeChainQuestion = (id: string, parentId: string | null, order: number): 
 	text: `Q ${id}`,
 	content: { type: 'code-snippet', language: 'ts', code: 'x' },
 	answer: { type: 'open' },
-	chain_parent_id: parentId,
-	chain_order: order
+	shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+	steps: [{ text: `Q ${id}`, answer: { type: 'open' } }]
 });
 const makeMCChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
 	id,
@@ -27,8 +27,13 @@ const makeMCChainQuestion = (id: string, parentId: string | null, order: number)
 	text: `Q ${id}`,
 	content: { type: 'code-snippet', language: 'ts', code: 'x' },
 	answer: { type: 'multiple-choice', options: ['A', 'B', 'C'], correctIndex: 0 },
-	chain_parent_id: parentId,
-	chain_order: order
+	shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+	steps: [
+		{
+			text: `Q ${id}`,
+			answer: { type: 'multiple-choice', options: ['A', 'B', 'C'], correctIndex: 0 }
+		}
+	]
 });
 const makeTFChainQuestion = (id: string, parentId: string | null, order: number): Question => ({
 	id,
@@ -36,8 +41,8 @@ const makeTFChainQuestion = (id: string, parentId: string | null, order: number)
 	text: `Q ${id}`,
 	content: { type: 'code-snippet', language: 'ts', code: 'x' },
 	answer: { type: 'true-false', correctAnswer: true },
-	chain_parent_id: parentId,
-	chain_order: order
+	shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+	steps: [{ text: `Q ${id}`, answer: { type: 'true-false', correctAnswer: true } }]
 });
 const makeSessionStudent = (
 	studentId: string,

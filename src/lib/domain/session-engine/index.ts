@@ -189,7 +189,7 @@ export class SessionEngine {
 		const student = this.currentStudent;
 		if (!student || this._questions.length === 0) return null;
 
-		const allRootQuestions = this._questions.filter((q) => q.chain_parent_id === null);
+		const allRootQuestions = this._questions;
 		if (allRootQuestions.length === 0) return null;
 
 		const rootQuestions = allRootQuestions.filter((q) => !this._askedThisSession.has(q.id));
@@ -202,12 +202,18 @@ export class SessionEngine {
 		const rootQ = selector.pick(student, this._attempts, rootQuestions);
 		this._askedThisSession.add(rootQ.id);
 
-		const children = this._questions
-			.filter((q) => q.chain_parent_id === rootQ.id)
-			.sort((a, b) => a.chain_order - b.chain_order);
+		const sharedContent = rootQ.shared?.content;
+		const chainQuestions = rootQ.steps.map((step, index) => ({
+			...rootQ,
+			id: index === 0 ? rootQ.id : `${rootQ.id}::step:${index}`,
+			steps: [step],
+			text: step.text,
+			answer: step.answer,
+			content: sharedContent
+		}));
 
-		if (children.length > 0) {
-			this._chainQuestions = [rootQ, ...children];
+		if (chainQuestions.length > 1) {
+			this._chainQuestions = chainQuestions;
 			this._chainIndex = 0;
 			this._chainOutcomes = [];
 			return this._chainQuestions[0];
@@ -215,7 +221,7 @@ export class SessionEngine {
 			this._chainQuestions = [];
 			this._chainIndex = 0;
 			this._chainOutcomes = [];
-			return rootQ;
+			return chainQuestions[0] ?? null;
 		}
 	}
 }

@@ -51,7 +51,7 @@
 		}
 		if (!engine || engine.isComplete || recording) return;
 		// MC/TF questions are graded by button clicks — suppress keyboard shortcuts
-		if (currentQuestion && currentQuestion.answer.type !== 'open') return;
+		if (currentQuestion && currentAnswer?.type !== 'open') return;
 		if (e.key === '1' || e.key === 'c' || e.key === 'C') {
 			recordOutcome('correct');
 		} else if (e.key === '2' || e.key === 'p' || e.key === 'P') {
@@ -77,15 +77,15 @@
 	}
 
 	function handleMCOption(optionIndex: number) {
-		if (!currentQuestion || recording) return;
-		const answer = currentQuestion.answer as MCAnswerConfig;
+		if (!currentQuestion || !currentAnswer || recording) return;
+		const answer = currentAnswer as MCAnswerConfig;
 		const outcome = optionIndex === answer.correctIndex ? 'correct' : 'wrong';
 		recordOutcome(outcome);
 	}
 
 	function handleTFButton(chosen: boolean) {
-		if (!currentQuestion || recording) return;
-		const answer = currentQuestion.answer as TFAnswerConfig;
+		if (!currentQuestion || !currentAnswer || recording) return;
+		const answer = currentAnswer as TFAnswerConfig;
 		const outcome = chosen === answer.correctAnswer ? 'correct' : 'wrong';
 		recordOutcome(outcome);
 	}
@@ -108,7 +108,10 @@
 	let isComplete = $derived(tick >= 0 ? (engine?.isComplete ?? false) : false);
 	let progress = $derived(tick >= 0 ? engine?.progress : null);
 	let chainProgress = $derived(tick >= 0 ? engine?.chainProgress : null);
-	let currentContent = $derived(currentQuestion?.content);
+let currentStep = $derived(currentQuestion?.steps[0]);
+let currentAnswer = $derived(currentStep?.answer ?? currentQuestion?.answer);
+let currentContent = $derived(currentQuestion?.shared?.content ?? currentQuestion?.content);
+let currentText = $derived(currentStep?.text ?? currentQuestion?.text ?? '');
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -182,7 +185,7 @@
 
 			<main class="flex-1 space-y-8">
 				<div class="rounded-xl bg-gray-800 p-6 shadow-lg">
-					<h2 class="text-2xl font-medium text-gray-100">{currentQuestion.text}</h2>
+					<h2 class="text-2xl font-medium text-gray-100">{currentText}</h2>
 				</div>
 
 				{#if currentContent && currentContent.type === 'code-snippet'}
@@ -201,7 +204,7 @@
 			</main>
 
 			<footer class="mt-8">
-				{#if currentQuestion.answer.type === 'open'}
+				{#if currentAnswer?.type === 'open'}
 					<p class="text-center text-sm text-gray-500">
 						Press <kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">1</kbd> /
 						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">C</kbd>
@@ -212,11 +215,11 @@
 						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">3</kbd> /
 						<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">W</kbd> = Wrong
 					</p>
-				{:else if currentQuestion.answer.type === 'multiple-choice'}
+				{:else if currentAnswer?.type === 'multiple-choice'}
 					<div class="space-y-3">
 						<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
 						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							{#each (currentQuestion.answer as MCAnswerConfig).options as option, i}
+							{#each (currentAnswer as MCAnswerConfig).options as option, i}
 								<button
 									type="button"
 									disabled={recording}
@@ -229,7 +232,7 @@
 							{/each}
 						</div>
 					</div>
-				{:else if currentQuestion.answer.type === 'true-false'}
+				{:else if currentAnswer?.type === 'true-false'}
 					<div class="space-y-3">
 						<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
 						<div class="flex justify-center gap-6">
