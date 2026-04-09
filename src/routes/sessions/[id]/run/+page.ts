@@ -27,6 +27,7 @@ export const load = async ({ params }) => {
 			allQuestions.push(...qs);
 		}
 
+		// Keep loader payload shape stable for SessionEngine resume (active_unit_progress stays on session).
 		return { session, sessionStudents, students, allQuestions, attempts };
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e && (e as { status: number }).status === 404) {
