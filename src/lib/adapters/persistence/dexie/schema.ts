@@ -41,6 +41,14 @@ class QuizAppDB extends Dexie {
 				// Clean break (D002): no data migration. Dexie deletes the snippets table
 				// and re-indexes questions. Old data is lost on upgrade.
 			});
+
+		this.version(3)
+			.stores({
+				questions: 'id, question_set_id'
+			})
+			.upgrade((_tx) => {
+				// Clean break for logical-question rows: old chain-indexed question data is discarded.
+			});
 	}
 }
 
