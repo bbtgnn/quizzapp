@@ -1,23 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { parseQuestionSetFile } from '$lib/importer/index.js';
-import type { ParsedQuestionSet } from '$lib/importer/index.js';
+import type { QuestionSetFile } from '$lib/importer/index.js';
 import { persistQuestionSet } from './persist-question-set.js';
 import type { QuestionSetRepository } from '$lib/ports/question-set-repository.js';
-import type { ContentConfig } from '$lib/model/types.js';
 
 describe('persistQuestionSet', () => {
-	it('creates questions with content and answer configs, including chain', async () => {
-		const content: ContentConfig = { type: 'code-snippet', language: 'ts', code: 'x' };
-
+	it('deletes existing questions before inserting logical rows', async () => {
 		const createQuestion = vi.fn().mockResolvedValue({
-			id: 'qroot',
+			id: 'q1',
 			question_set_id: 'qs1',
-			shared: { content },
-			steps: [
-				{ text: 'Q1', answer: { type: 'open' } },
-				{ text: 'C1', answer: { type: 'open' } }
-			]
+			steps: [{ text: 'Q1', answer: { type: 'open' } }]
 		});
+		const deleteQuestionsByQuestionSet = vi.fn().mockResolvedValue(undefined);
 
 		const questionSets: QuestionSetRepository = {
 			createQuestionSet: vi.fn(),
@@ -26,42 +20,37 @@ describe('persistQuestionSet', () => {
 			deleteQuestionSet: vi.fn(),
 			createQuestion,
 			listQuestionsByQuestionSet: vi.fn(),
-			deleteQuestionsByQuestionSet: vi.fn()
+			deleteQuestionsByQuestionSet
 		};
 
-		const parsed: ParsedQuestionSet = {
+		const questionSetFile: QuestionSetFile = {
 			name: 'Test Set',
+			schemaVersion: 1,
 			questions: [
 				{
-					text: 'Q1',
-					content,
-					answer: { type: 'open' },
-					chain: [{ text: 'C1', answer: { type: 'open' } }]
+					steps: [{ text: 'Q1', answer: { type: 'open' } }]
 				}
 			]
 		};
 
-		await persistQuestionSet(questionSets, 'qs1', parsed);
+		await persistQuestionSet(questionSets, 'qs1', questionSetFile);
 
+		expect(deleteQuestionsByQuestionSet).toHaveBeenCalledTimes(1);
+		expect(deleteQuestionsByQuestionSet).toHaveBeenCalledWith('qs1');
 		expect(createQuestion).toHaveBeenCalledTimes(1);
-		expect(createQuestion).toHaveBeenNthCalledWith(1, 'qs1', {
-			shared: { content },
-			steps: [
-				{ text: 'Q1', answer: { type: 'open' } },
-				{ text: 'C1', answer: { type: 'open' } }
-			]
-		});
 	});
 
-	it('creates standalone questions without chain', async () => {
-		const content: ContentConfig = { type: 'code-snippet', language: 'py', code: 'print(1)' };
-
+	it('writes exactly one row for a multi-step logical question', async () => {
 		const createQuestion = vi.fn().mockResolvedValue({
-			id: 'q1',
+			id: 'qroot',
 			question_set_id: 'qs1',
-			shared: { content },
-			steps: [{ text: 'Q1', answer: { type: 'open' } }]
+			shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+			steps: [
+				{ text: 'Step 1', answer: { type: 'open' }, range: { startLine: 1, endLine: 1 } },
+				{ text: 'Step 2', answer: { type: 'open' }, range: { startLine: 2, endLine: 2 } }
+			]
 		});
+		const deleteQuestionsByQuestionSet = vi.fn().mockResolvedValue(undefined);
 
 		const questionSets: QuestionSetRepository = {
 			createQuestionSet: vi.fn(),
@@ -70,28 +59,37 @@ describe('persistQuestionSet', () => {
 			deleteQuestionSet: vi.fn(),
 			createQuestion,
 			listQuestionsByQuestionSet: vi.fn(),
-			deleteQuestionsByQuestionSet: vi.fn()
+			deleteQuestionsByQuestionSet
 		};
 
-		const parsed: ParsedQuestionSet = {
-			name: 'Test',
+		const questionSetFile: QuestionSetFile = {
+			name: 'Logical set',
+			schemaVersion: 1,
 			questions: [
-				{ text: 'Q1', content, answer: { type: 'open' } },
-				{ text: 'Q2', content, answer: { type: 'open' }, difficulty: 'hard' }
+				{
+					shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+					steps: [
+						{ text: 'Step 1', answer: { type: 'open' }, range: { startLine: 1, endLine: 1 } },
+						{ text: 'Step 2', answer: { type: 'open' }, range: { startLine: 2, endLine: 2 } }
+					]
+				}
 			]
 		};
 
-		await persistQuestionSet(questionSets, 'qs1', parsed);
+		await persistQuestionSet(questionSets, 'qs1', questionSetFile);
 
-		expect(createQuestion).toHaveBeenCalledTimes(2);
-		expect(createQuestion).toHaveBeenNthCalledWith(2, 'qs1', {
-			shared: { content },
-			steps: [{ text: 'Q2', answer: { type: 'open' } }],
-			difficulty: 'hard'
+		expect(deleteQuestionsByQuestionSet).toHaveBeenCalledTimes(1);
+		expect(createQuestion).toHaveBeenCalledTimes(1);
+		expect(createQuestion).toHaveBeenCalledWith('qs1', {
+			shared: { content: { type: 'code-snippet', language: 'ts', code: 'x' } },
+			steps: [
+				{ text: 'Step 1', answer: { type: 'open' }, range: { startLine: 1, endLine: 1 } },
+				{ text: 'Step 2', answer: { type: 'open' }, range: { startLine: 2, endLine: 2 } }
+			]
 		});
 	});
 
-	it('persists multi-step logical import after parseQuestionSetFile bridge', async () => {
+	it('persists parseQuestionSetFile result with logical contract', async () => {
 		const json = JSON.stringify({
 			name: 'Logical / multi',
 			schemaVersion: 1,
@@ -119,24 +117,14 @@ describe('persistQuestionSet', () => {
 		const parsedResult = parseQuestionSetFile(json);
 		expect(parsedResult.ok).toBe(true);
 		if (!parsedResult.ok) return;
-		const parsed = parsedResult.data;
-
-		const rootContent: ContentConfig = {
-			type: 'code-snippet',
-			language: 'ts',
-			code: 'line1\nline2',
-			highlight: { startLine: 1, endLine: 1 }
-		};
 
 		const createQuestion = vi.fn().mockResolvedValue({
 			id: 'qroot',
 			question_set_id: 'qs1',
-			shared: { content: rootContent },
-			steps: [
-				{ text: 'Root prompt', answer: { type: 'open' } },
-				{ text: 'Chain prompt', answer: { type: 'open', referenceAnswer: 'ref' } }
-			]
+			shared: parsedResult.data.questions[0]?.shared,
+			steps: parsedResult.data.questions[0]?.steps ?? []
 		});
+		const deleteQuestionsByQuestionSet = vi.fn().mockResolvedValue(undefined);
 
 		const questionSets: QuestionSetRepository = {
 			createQuestionSet: vi.fn(),
@@ -145,18 +133,12 @@ describe('persistQuestionSet', () => {
 			deleteQuestionSet: vi.fn(),
 			createQuestion,
 			listQuestionsByQuestionSet: vi.fn(),
-			deleteQuestionsByQuestionSet: vi.fn()
+			deleteQuestionsByQuestionSet
 		};
 
-		await persistQuestionSet(questionSets, 'qs1', parsed);
+		await persistQuestionSet(questionSets, 'qs1', parsedResult.data);
 
 		expect(createQuestion).toHaveBeenCalledTimes(1);
-		expect(createQuestion).toHaveBeenNthCalledWith(1, 'qs1', {
-			shared: { content: rootContent },
-			steps: [
-				{ text: 'Root prompt', answer: { type: 'open' } },
-				{ text: 'Chain prompt', answer: { type: 'open', referenceAnswer: 'ref' } }
-			]
-		});
+		expect(createQuestion).toHaveBeenCalledWith('qs1', parsedResult.data.questions[0]);
 	});
 });

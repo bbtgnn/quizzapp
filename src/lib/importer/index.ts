@@ -1,13 +1,11 @@
 import { formatQuestionSetParseError } from './errors.js';
-import { logicalQuestionSetFileToParsed } from './logical-to-parsed-question-set.js';
-import type { ParseResult, ParsedChainItem, ParsedQuestion, ParsedQuestionSet } from './parsed-types.js';
-import { QuestionSetFileSchema } from './question-set.schema.js';
+import { QuestionSetFileSchema, type QuestionSetFile } from './question-set.schema.js';
 
-export type { ParsedChainItem, ParsedQuestion, ParsedQuestionSet, ParseResult };
+export type ParseResult = { ok: true; data: QuestionSetFile } | { ok: false; error: string };
+export type { QuestionSetFile };
 
 export { QuestionSetFileSchema } from './question-set.schema.js';
 export { formatQuestionSetParseError } from './errors.js';
-export { logicalQuestionSetFileToParsed } from './logical-to-parsed-question-set.js';
 
 export function parseQuestionSetFile(jsonString: string): ParseResult {
 	let parsedJson: unknown;
@@ -22,5 +20,5 @@ export function parseQuestionSetFile(jsonString: string): ParseResult {
 		return { ok: false, error: formatQuestionSetParseError(result.error) };
 	}
 
-	return { ok: true, data: logicalQuestionSetFileToParsed(result.data) };
+	return { ok: true, data: result.data };
 }
