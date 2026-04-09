@@ -8,4 +8,9 @@ export interface SessionEnginePersistence {
 		id: string,
 		changes: Partial<Omit<SessionStudent, 'id'>>
 	): Promise<void>;
+	persistActiveUnitState(
+		sessionId: string,
+		state: NonNullable<Session['active_unit_progress']>
+	): Promise<void>;
+	clearActiveUnitState(sessionId: string): Promise<void>;
 }
