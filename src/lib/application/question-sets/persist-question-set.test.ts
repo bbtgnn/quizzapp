@@ -9,26 +9,15 @@ describe('persistQuestionSet', () => {
 	it('creates questions with content and answer configs, including chain', async () => {
 		const content: ContentConfig = { type: 'code-snippet', language: 'ts', code: 'x' };
 
-		const createQuestion = vi
-			.fn()
-			.mockResolvedValueOnce({
-				id: 'qroot',
-				question_set_id: 'qs1',
-				text: 'Q1',
-				content,
-				answer: { type: 'open' },
-				chain_parent_id: null,
-				chain_order: 0
-			})
-			.mockResolvedValue({
-				id: 'qchild',
-				question_set_id: 'qs1',
-				text: 'C1',
-				content,
-				answer: { type: 'open' },
-				chain_parent_id: 'qroot',
-				chain_order: 1
-			});
+		const createQuestion = vi.fn().mockResolvedValue({
+			id: 'qroot',
+			question_set_id: 'qs1',
+			shared: { content },
+			steps: [
+				{ text: 'Q1', answer: { type: 'open' } },
+				{ text: 'C1', answer: { type: 'open' } }
+			]
+		});
 
 		const questionSets: QuestionSetRepository = {
 			createQuestionSet: vi.fn(),
@@ -54,20 +43,13 @@ describe('persistQuestionSet', () => {
 
 		await persistQuestionSet(questionSets, 'qs1', parsed);
 
-		expect(createQuestion).toHaveBeenCalledTimes(2);
+		expect(createQuestion).toHaveBeenCalledTimes(1);
 		expect(createQuestion).toHaveBeenNthCalledWith(1, 'qs1', {
-			text: 'Q1',
-			content,
-			answer: { type: 'open' },
-			chain_parent_id: null,
-			chain_order: 0
-		});
-		expect(createQuestion).toHaveBeenNthCalledWith(2, 'qs1', {
-			text: 'C1',
-			content, // inherited from parent
-			answer: { type: 'open' },
-			chain_parent_id: 'qroot',
-			chain_order: 1
+			shared: { content },
+			steps: [
+				{ text: 'Q1', answer: { type: 'open' } },
+				{ text: 'C1', answer: { type: 'open' } }
+			]
 		});
 	});
 
@@ -77,11 +59,8 @@ describe('persistQuestionSet', () => {
 		const createQuestion = vi.fn().mockResolvedValue({
 			id: 'q1',
 			question_set_id: 'qs1',
-			text: 'Q1',
-			content,
-			answer: { type: 'open' },
-			chain_parent_id: null,
-			chain_order: 0
+			shared: { content },
+			steps: [{ text: 'Q1', answer: { type: 'open' } }]
 		});
 
 		const questionSets: QuestionSetRepository = {
@@ -106,12 +85,9 @@ describe('persistQuestionSet', () => {
 
 		expect(createQuestion).toHaveBeenCalledTimes(2);
 		expect(createQuestion).toHaveBeenNthCalledWith(2, 'qs1', {
-			text: 'Q2',
-			content,
-			answer: { type: 'open' },
-			difficulty: 'hard',
-			chain_parent_id: null,
-			chain_order: 0
+			shared: { content },
+			steps: [{ text: 'Q2', answer: { type: 'open' } }],
+			difficulty: 'hard'
 		});
 	});
 
@@ -152,26 +128,15 @@ describe('persistQuestionSet', () => {
 			highlight: { startLine: 1, endLine: 1 }
 		};
 
-		const createQuestion = vi
-			.fn()
-			.mockResolvedValueOnce({
-				id: 'qroot',
-				question_set_id: 'qs1',
-				text: 'Root prompt',
-				content: rootContent,
-				answer: { type: 'open' },
-				chain_parent_id: null,
-				chain_order: 0
-			})
-			.mockResolvedValue({
-				id: 'qchild',
-				question_set_id: 'qs1',
-				text: 'Chain prompt',
-				content: rootContent,
-				answer: { type: 'open', referenceAnswer: 'ref' },
-				chain_parent_id: 'qroot',
-				chain_order: 1
-			});
+		const createQuestion = vi.fn().mockResolvedValue({
+			id: 'qroot',
+			question_set_id: 'qs1',
+			shared: { content: rootContent },
+			steps: [
+				{ text: 'Root prompt', answer: { type: 'open' } },
+				{ text: 'Chain prompt', answer: { type: 'open', referenceAnswer: 'ref' } }
+			]
+		});
 
 		const questionSets: QuestionSetRepository = {
 			createQuestionSet: vi.fn(),
@@ -185,20 +150,13 @@ describe('persistQuestionSet', () => {
 
 		await persistQuestionSet(questionSets, 'qs1', parsed);
 
-		expect(createQuestion).toHaveBeenCalledTimes(2);
+		expect(createQuestion).toHaveBeenCalledTimes(1);
 		expect(createQuestion).toHaveBeenNthCalledWith(1, 'qs1', {
-			text: 'Root prompt',
-			content: rootContent,
-			answer: { type: 'open' },
-			chain_parent_id: null,
-			chain_order: 0
-		});
-		expect(createQuestion).toHaveBeenNthCalledWith(2, 'qs1', {
-			text: 'Chain prompt',
-			content: rootContent,
-			answer: { type: 'open', referenceAnswer: 'ref' },
-			chain_parent_id: 'qroot',
-			chain_order: 1
+			shared: { content: rootContent },
+			steps: [
+				{ text: 'Root prompt', answer: { type: 'open' } },
+				{ text: 'Chain prompt', answer: { type: 'open', referenceAnswer: 'ref' } }
+			]
 		});
 	});
 });
