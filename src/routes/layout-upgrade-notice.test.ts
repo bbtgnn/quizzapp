@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NOTICE_STORAGE_KEY, shouldShowUpgradeNotice } from './+layout';
+import { NOTICE_STORAGE_KEY, shouldShowUpgradeNotice } from './layout-upgrade-notice';
 
 describe('shouldShowUpgradeNotice', () => {
 	it('returns true when marker is missing', () => {
