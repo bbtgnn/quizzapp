@@ -59,7 +59,12 @@ Plans:
 2. **`persistQuestionSet`** writes each logical question **without** expanding it into multiple linked rows per unit.
 3. **IndexedDB wipe** on upgrade is an **accepted** behavior and is **documented** so developers (and users, if applicable) know local data may reset—no migration of old chain rows required.
 
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [x] 02-01-PLAN.md — Cut over question persistence contract + Dexie v3 chain-free schema/indexes (DATA-01)
+- [x] 02-02-PLAN.md — Refactor `persistQuestionSet` to one-write-per-logical-question with regression tests (DATA-02)
+- [x] 02-03-PLAN.md — Add upgrade wipe communication in UI + README + CHANGELOG (DATA-03)
 
 ### Phase 3: Session engine & aggregate scoring
 
