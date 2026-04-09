@@ -10,13 +10,14 @@ export class SessionEngine {
 	private _sessionStudentsMap: Map<string, SessionStudent>;
 	private _orderedStudents: Student[];
 	private _currentIndex: number;
-	private _currentQuestion: Question | null;
+	private _activeRootQuestion: Question | null;
+	private _currentStepIndex: number;
+	private _stepOutcomes: Array<'correct' | 'wrong'>;
 	private readonly _createAttempt: SessionEnginePersistence['createAttempt'];
 	private readonly _updateSession: SessionEnginePersistence['updateSession'];
 	private readonly _updateSessionStudent: SessionEnginePersistence['updateSessionStudent'];
-	private _chainQuestions: Question[] = [];
-	private _chainIndex: number = 0;
-	private _chainOutcomes: Array<'correct' | 'partial' | 'wrong'> = [];
+	private readonly _persistActiveUnitState: SessionEnginePersistence['persistActiveUnitState'];
+	private readonly _clearActiveUnitState: SessionEnginePersistence['clearActiveUnitState'];
 	private _askedThisSession: Set<string> = new Set();
 
 	constructor(
@@ -33,28 +34,45 @@ export class SessionEngine {
 		this._createAttempt = persistence.createAttempt;
 		this._updateSession = persistence.updateSession;
 		this._updateSessionStudent = persistence.updateSessionStudent;
+		this._persistActiveUnitState = persistence.persistActiveUnitState;
+		this._clearActiveUnitState = persistence.clearActiveUnitState;
 
 		this._sessionStudentsMap = new Map(sessionStudents.map((ss) => [ss.student_id, { ...ss }]));
+		this._activeRootQuestion = null;
+		this._currentStepIndex = 0;
+		this._stepOutcomes = [];
 
 		if (session.status === 'completed') {
 			this._orderedStudents = [];
 			this._currentIndex = 0;
-			this._currentQuestion = null;
 			return;
 		}
 
-		if (session.status === 'paused') {
-			const orderer = getStudentStrategy('default');
-			this._orderedStudents = orderer.order(students, sessionStudents);
-		} else {
-			this._orderedStudents = students.filter((s) => {
-				const ss = this._sessionStudentsMap.get(s.id);
-				return !ss || !ss.completed;
-			});
-		}
+		const activeSessionStudents = sessionStudents.filter((ss) => !ss.completed);
+		const orderer = getStudentStrategy('default');
+		this._orderedStudents = orderer.order(students, activeSessionStudents);
 
 		this._currentIndex = 0;
-		this._currentQuestion = this._pickQuestion();
+		if (session.active_unit_progress) {
+			const root = this._questions.find(
+				(q) => q.id === session.active_unit_progress?.root_question_id
+			);
+			if (root) {
+				this._activeRootQuestion = root;
+				this._currentStepIndex = Math.min(
+					Math.max(session.active_unit_progress.step_index, 0),
+					Math.max(root.steps.length - 1, 0)
+				);
+				this._stepOutcomes = session.active_unit_progress.step_outcomes.filter(
+					(outcome): outcome is 'correct' | 'wrong' => outcome === 'correct' || outcome === 'wrong'
+				);
+				this._askedThisSession.add(root.id);
+			}
+		}
+
+		if (!this._activeRootQuestion) {
+			this._activeRootQuestion = this._pickQuestion();
+		}
 	}
 
 	get currentStudent(): Student | null {
@@ -63,16 +81,41 @@ export class SessionEngine {
 	}
 
 	get currentQuestion(): Question | null {
-		return this._currentQuestion;
+		const root = this._activeRootQuestion;
+		const step = this.currentStep;
+		if (!root || !step) return null;
+		return {
+			...root,
+			text: step.text,
+			answer: step.answer,
+			steps: [step]
+		};
 	}
 
 	get isComplete(): boolean {
-		return this._currentIndex >= this._orderedStudents.length;
+		// Session completion is driven by assigned-question coverage, not pool exhaustion.
+		return this._orderedStudents.length === 0 || this._orderedStudents.every((student) => {
+			const ss = this._sessionStudentsMap.get(student.id);
+			return !ss || ss.completed || ss.question_slots_remaining <= 0;
+		});
+	}
+
+	get currentStep(): Question['steps'][number] | null {
+		if (!this._activeRootQuestion) return null;
+		return this._activeRootQuestion.steps[this._currentStepIndex] ?? null;
+	}
+
+	get currentStepIndex(): number {
+		return this._activeRootQuestion ? this._currentStepIndex : 0;
+	}
+
+	get totalSteps(): number {
+		return this._activeRootQuestion?.steps.length ?? 0;
 	}
 
 	get chainProgress(): { current: number; total: number } | null {
-		if (this._chainQuestions.length === 0) return null;
-		return { current: this._chainIndex + 1, total: this._chainQuestions.length };
+		if (!this._activeRootQuestion || this.totalSteps <= 1) return null;
+		return { current: this.currentStepIndex + 1, total: this.totalSteps };
 	}
 
 	get progress(): {
@@ -101,52 +144,57 @@ export class SessionEngine {
 	}
 
 	async recordOutcome(outcome: 'correct' | 'partial' | 'wrong'): Promise<void> {
-		if (this.isComplete || !this.currentStudent || !this._currentQuestion) return;
+		if (this.isComplete || !this.currentStudent || !this._activeRootQuestion) return;
 
-		const student = this.currentStudent;
+		const normalized: 'correct' | 'wrong' = outcome === 'correct' ? 'correct' : 'wrong';
+		this._stepOutcomes.push(normalized);
 
-		if (this._chainQuestions.length > 0) {
-			this._chainOutcomes.push(outcome);
-
-			if (this._chainIndex < this._chainQuestions.length - 1) {
-				this._chainIndex++;
-				this._currentQuestion = this._chainQuestions[this._chainIndex];
-				return;
-			}
-
-			const aggregateOutcome = this._computeChainOutcome(this._chainOutcomes);
-			const rootQuestion = this._chainQuestions[0];
-
-			const attempt = await this._createAttempt({
-				session_id: this._session.id,
-				student_id: student.id,
-				question_id: rootQuestion.id,
-				outcome: aggregateOutcome
+		const totalSteps = this.totalSteps;
+		const isLastStep = this._currentStepIndex >= totalSteps - 1;
+		if (!isLastStep) {
+			this._currentStepIndex += 1;
+			await this._persistActiveUnitState(this._session.id, {
+				root_question_id: this._activeRootQuestion.id,
+				step_index: this._currentStepIndex,
+				step_outcomes: [...this._stepOutcomes]
 			});
-			this._attempts.push(attempt);
-
-			this._chainQuestions = [];
-			this._chainIndex = 0;
-			this._chainOutcomes = [];
-
-			await this._consumeSlot(student);
 			return;
 		}
 
-		const question = this._currentQuestion;
-
+		const aggregate = this._computeAggregateOutcome(this._stepOutcomes);
+		const rootQuestion = this._activeRootQuestion;
 		const attempt = await this._createAttempt({
 			session_id: this._session.id,
-			student_id: student.id,
-			question_id: question.id,
-			outcome
+			student_id: this.currentStudent.id,
+			question_id: rootQuestion.id,
+			outcome: aggregate
 		});
 		this._attempts.push(attempt);
 
-		await this._consumeSlot(student);
+		await this._clearActiveUnitState(this._session.id);
+		this._activeRootQuestion = null;
+		this._currentStepIndex = 0;
+		this._stepOutcomes = [];
+		await this._consumeSlot(this.currentStudent);
+	}
+
+	async skipCurrentUnit(): Promise<void> {
+		if (this.isComplete || !this.currentStudent || !this._activeRootQuestion) return;
+		await this._clearActiveUnitState(this._session.id);
+		this._activeRootQuestion = null;
+		this._currentStepIndex = 0;
+		this._stepOutcomes = [];
+		await this._consumeSlot(this.currentStudent);
 	}
 
 	async pause(): Promise<void> {
+		if (this._activeRootQuestion) {
+			await this._persistActiveUnitState(this._session.id, {
+				root_question_id: this._activeRootQuestion.id,
+				step_index: this._currentStepIndex,
+				step_outcomes: [...this._stepOutcomes]
+			});
+		}
 		await this._updateSession(this._session.id, { status: 'paused' });
 	}
 
@@ -160,28 +208,31 @@ export class SessionEngine {
 
 			this._currentIndex++;
 
-			if (this._currentIndex >= this._orderedStudents.length) {
+			if (this.isComplete || this._currentIndex >= this._orderedStudents.length) {
 				await this._updateSession(this._session.id, {
 					status: 'completed',
 					completed_at: Date.now()
 				});
-				this._currentQuestion = null;
 			} else {
-				this._currentQuestion = this._pickQuestion();
+				this._activeRootQuestion = this._pickQuestion();
+				this._currentStepIndex = 0;
+				this._stepOutcomes = [];
 			}
 		} else {
 			await this._updateSessionStudent(ss.id, {
 				question_slots_remaining: ss.question_slots_remaining
 			});
-			this._currentQuestion = this._pickQuestion();
+			this._activeRootQuestion = this._pickQuestion();
+			this._currentStepIndex = 0;
+			this._stepOutcomes = [];
 		}
 	}
 
-	private _computeChainOutcome(
-		outcomes: Array<'correct' | 'partial' | 'wrong'>
+	private _computeAggregateOutcome(
+		outcomes: Array<'correct' | 'wrong'>
 	): 'correct' | 'partial' | 'wrong' {
 		if (outcomes.every((o) => o === 'correct')) return 'correct';
-		if (outcomes.some((o) => o === 'wrong')) return 'wrong';
+		if (outcomes.every((o) => o === 'wrong')) return 'wrong';
 		return 'partial';
 	}
 
@@ -201,27 +252,6 @@ export class SessionEngine {
 		const selector = getQuestionStrategy(this._session.strategy_id);
 		const rootQ = selector.pick(student, this._attempts, rootQuestions);
 		this._askedThisSession.add(rootQ.id);
-
-		const sharedContent = rootQ.shared?.content;
-		const chainQuestions = rootQ.steps.map((step, index) => ({
-			...rootQ,
-			id: index === 0 ? rootQ.id : `${rootQ.id}::step:${index}`,
-			steps: [step],
-			text: step.text,
-			answer: step.answer,
-			content: sharedContent
-		}));
-
-		if (chainQuestions.length > 1) {
-			this._chainQuestions = chainQuestions;
-			this._chainIndex = 0;
-			this._chainOutcomes = [];
-			return this._chainQuestions[0];
-		} else {
-			this._chainQuestions = [];
-			this._chainIndex = 0;
-			this._chainOutcomes = [];
-			return chainQuestions[0] ?? null;
-		}
+		return rootQ;
 	}
 }
