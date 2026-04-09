@@ -40,3 +40,11 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+## Local persistence upgrade behavior
+
+This milestone introduces a Dexie v3 schema cutover for persisted questions.
+
+- IndexedDB wipe: browser-local IndexedDB data may be reset after the upgrade.
+- no migration: chain-era persisted rows are not migrated to the new logical-question shape.
+- Recovery path: if local question sets are missing after upgrade, re-import your JSON files.
