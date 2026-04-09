@@ -22,9 +22,9 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		if (!result.ok) return;
 		expect(result.data.name).toBe('Set A');
 		expect(result.data.questions).toHaveLength(1);
-		expect(result.data.questions[0].text).toBe('q1');
-		expect(result.data.questions[0].content).toEqual({ type: 'markdown', body: 'Intro text' });
-		expect(result.data.questions[0].answer).toEqual({ type: 'open' });
+		expect(result.data.questions[0].steps[0]?.text).toBe('q1');
+		expect(result.data.questions[0].shared?.content).toEqual({ type: 'markdown', body: 'Intro text' });
+		expect(result.data.questions[0].steps[0]?.answer).toEqual({ type: 'open' });
 	});
 
 	it('rejects unknown root key (strict object / D-07)', () => {
@@ -45,7 +45,7 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		expect(result.error).toMatch(/foo|\(root\)/);
 	});
 
-	it('maps code-snippet shared + two steps with ranges to root highlight and chain', () => {
+	it('keeps code-snippet shared + multi-step ranges in logical shape', () => {
 		const raw = q({
 			name: 'Code chain',
 			schemaVersion: 1,
@@ -73,15 +73,15 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
 		const q0 = result.data.questions[0];
-		expect(q0.content).toEqual({
+		expect(q0.shared?.content).toEqual({
 			type: 'code-snippet',
 			language: 'js',
-			code: 'const a = 1;\nconst b = 2;',
-			highlight: { startLine: 1, endLine: 1 }
+			code: 'const a = 1;\nconst b = 2;'
 		});
-		expect(q0.chain).toHaveLength(1);
-		expect(q0.chain![0].text).toBe('Second');
-		expect(q0.chain![0].answer).toEqual({ type: 'open' });
+		expect(q0.steps).toHaveLength(2);
+		expect(q0.steps[1]?.text).toBe('Second');
+		expect(q0.steps[1]?.answer).toEqual({ type: 'open' });
+		expect(q0.steps[1]?.range).toEqual({ startLine: 2, endLine: 2 });
 	});
 
 	it('allows markdown shared without step range; rejects range on markdown shared', () => {
@@ -136,7 +136,7 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		expect(result.error).toMatch(/questions\[0\]\.steps\[0\]\.range/);
 	});
 
-	it('round-trips open answer referenceAnswer on root and chain', () => {
+	it('round-trips open answer referenceAnswer across steps', () => {
 		const raw = q({
 			name: 'Refs',
 			schemaVersion: 1,
@@ -159,8 +159,8 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		expect(result.data.questions[0].answer).toEqual({ type: 'open', referenceAnswer: 'alpha' });
-		expect(result.data.questions[0].chain![0].answer).toEqual({
+		expect(result.data.questions[0].steps[0]?.answer).toEqual({ type: 'open', referenceAnswer: 'alpha' });
+		expect(result.data.questions[0].steps[1]?.answer).toEqual({
 			type: 'open',
 			referenceAnswer: 'beta'
 		});
@@ -216,12 +216,12 @@ describe('parseQuestionSetFile (schemaVersion 1 logical format)', () => {
 		const result = parseQuestionSetFile(raw);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		expect(result.data.questions[0].answer).toEqual({
+		expect(result.data.questions[0].steps[0]?.answer).toEqual({
 			type: 'multiple-choice',
 			options: ['a', 'b'],
 			correctIndex: 0
 		});
-		expect(result.data.questions[1].answer).toEqual({
+		expect(result.data.questions[1].steps[0]?.answer).toEqual({
 			type: 'true-false',
 			correctAnswer: false
 		});
