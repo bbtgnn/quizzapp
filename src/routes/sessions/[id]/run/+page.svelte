@@ -68,6 +68,17 @@
 		}
 	}
 
+	async function handleSkipUnit() {
+		if (!engine || recording) return;
+		recording = true;
+		try {
+			await engine.skipCurrentUnit();
+			tick++;
+		} finally {
+			recording = false;
+		}
+	}
+
 	function dismissPlayerTransition() {
 		const p = pendingTransitionStudent;
 		if (p) {
@@ -107,11 +118,12 @@
 	let currentQuestion = $derived(tick >= 0 ? engine?.currentQuestion : null);
 	let isComplete = $derived(tick >= 0 ? (engine?.isComplete ?? false) : false);
 	let progress = $derived(tick >= 0 ? engine?.progress : null);
-	let chainProgress = $derived(tick >= 0 ? engine?.chainProgress : null);
-let currentStep = $derived(currentQuestion?.steps[0]);
-let currentAnswer = $derived(currentStep?.answer ?? currentQuestion?.answer);
-let currentContent = $derived(currentQuestion?.shared?.content ?? currentQuestion?.content);
-let currentText = $derived(currentStep?.text ?? currentQuestion?.text ?? '');
+	let currentStep = $derived(tick >= 0 ? (engine ? engine.currentStep : null) : null);
+	let currentStepIndex = $derived(tick >= 0 ? (engine ? engine.currentStepIndex : 0) : 0);
+	let totalSteps = $derived(tick >= 0 ? (engine ? engine.totalSteps : 0) : 0);
+	let currentAnswer = $derived(currentStep?.answer ?? currentQuestion?.answer);
+	let currentContent = $derived(currentQuestion?.shared?.content ?? currentQuestion?.content);
+	let currentText = $derived(currentStep?.text ?? currentQuestion?.text ?? '');
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -169,18 +181,28 @@ let currentText = $derived(currentStep?.text ?? currentQuestion?.text ?? '');
 								1} of {progress.slotsTotalForCurrentStudent}
 						</p>
 					{/if}
-					{#if chainProgress}
+					{#if totalSteps > 0}
 						<p class="text-sm text-gray-400">
-							Chain question {chainProgress.current} of {chainProgress.total}
+							Step {currentStepIndex + 1} of {totalSteps}
 						</p>
 					{/if}
 				</div>
-				<button
-					onclick={handlePause}
-					class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
-				>
-					Pause Session
-				</button>
+				<div class="flex items-center gap-3">
+					<button
+						type="button"
+						disabled={recording}
+						onclick={handleSkipUnit}
+						class="rounded-lg border border-amber-500 px-4 py-2 text-sm font-medium text-amber-300 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						Skip Unit
+					</button>
+					<button
+						onclick={handlePause}
+						class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
+					>
+						Pause Session
+					</button>
+				</div>
 			</header>
 
 			<main class="flex-1 space-y-8">
