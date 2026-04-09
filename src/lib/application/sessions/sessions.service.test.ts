@@ -13,7 +13,8 @@ describe('listSessionsOrderedByStartedAt', () => {
 			started_at: 100,
 			completed_at: null,
 			status: 'active',
-			strategy_id: 'default'
+			strategy_id: 'default',
+			active_unit_progress: null
 		};
 		const b: Session = {
 			id: 'b',
@@ -23,7 +24,8 @@ describe('listSessionsOrderedByStartedAt', () => {
 			started_at: 200,
 			completed_at: null,
 			status: 'active',
-			strategy_id: 'default'
+			strategy_id: 'default',
+			active_unit_progress: null
 		};
 		const listSessions = vi.fn().mockResolvedValue([a, b]);
 		const sessions: SessionRepository = {

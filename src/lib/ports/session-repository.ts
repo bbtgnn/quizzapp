@@ -2,7 +2,7 @@ import type { Session, SessionStudent } from '$lib/model/types.js';
 
 export interface SessionRepository {
 	createSession(
-		data: Omit<Session, 'id' | 'started_at' | 'completed_at' | 'status'>
+		data: Omit<Session, 'id' | 'started_at' | 'completed_at' | 'status' | 'active_unit_progress'>
 	): Promise<Session>;
 	getSession(id: string): Promise<Session | undefined>;
 	listSessions(): Promise<Session[]>;

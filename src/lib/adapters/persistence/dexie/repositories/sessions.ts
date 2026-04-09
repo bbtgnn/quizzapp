@@ -2,13 +2,14 @@ import { db } from '../schema.js';
 import type { Session, SessionStudent } from '$lib/model/types.js';
 
 export async function createSession(
-	data: Omit<Session, 'id' | 'started_at' | 'completed_at' | 'status'>
+	data: Omit<Session, 'id' | 'started_at' | 'completed_at' | 'status' | 'active_unit_progress'>
 ): Promise<Session> {
 	const session: Session = {
 		id: crypto.randomUUID(),
 		started_at: Date.now(),
 		completed_at: null,
 		status: 'active',
+		active_unit_progress: null,
 		...data
 	};
 	await db.sessions.add(session);
