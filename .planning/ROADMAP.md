@@ -81,7 +81,11 @@ Plans:
 3. For a completed unit: **all steps correct** → `correct`; **all wrong** → `wrong`; **any mix of correct and wrong** → `partial`.
 4. Exactly **one `Attempt`** is recorded per **completed** logical unit, tied to the **logical** `question_id`, using that aggregate outcome.
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [x] 03-01-PLAN.md — Rebuild SessionEngine as logical-unit authority with resumable step state and aggregate one-attempt scoring
+- [x] 03-02-PLAN.md — Wire run route to engine-owned progression and lock skip/resume behavior with integration assertions
 
 ### Phase 4: Live session run UI
 

@@ -20,10 +20,10 @@
 
 ### Session engine & scoring
 
-- [ ] **SESS-01**: The session **selection pool** contains **logical question ids only**; a multi-step unit consumes **one** slot in the teacher’s model.
-- [ ] **SESS-02**: **SessionEngine** owns **linear step progression** and exposes the **authoritative** current step and progress (no competing source of truth in UI).
+- [x] **SESS-01**: The session **selection pool** contains **logical question ids only**; a multi-step unit consumes **one** slot in the teacher’s model.
+- [x] **SESS-02**: **SessionEngine** owns **linear step progression** and exposes the **authoritative** current step and progress (no competing source of truth in UI).
 - [ ] **SESS-03**: **Aggregate outcome** for the unit: all steps correct → `correct`; all wrong → `wrong`; **any mix of correct and wrong** → `partial`.
-- [ ] **SESS-04**: Exactly **one `Attempt`** is recorded per completed logical unit, referencing the **logical** `question_id`, with the aggregate outcome above.
+- [x] **SESS-04**: Exactly **one `Attempt`** is recorded per completed logical unit, referencing the **logical** `question_id`, with the aggregate outcome above.
 
 ### Live session UI
 
@@ -73,10 +73,10 @@ Which phases cover which requirements — updated during roadmap creation.
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 2 | Pending |
 | DATA-03 | Phase 2 | Pending |
-| SESS-01 | Phase 3 | Pending |
-| SESS-02 | Phase 3 | Pending |
+| SESS-01 | Phase 3 | Complete |
+| SESS-02 | Phase 3 | Complete |
 | SESS-03 | Phase 3 | Pending |
-| SESS-04 | Phase 3 | Pending |
+| SESS-04 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |
