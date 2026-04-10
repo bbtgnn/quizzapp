@@ -292,3 +292,61 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		expect(repos.updateSessionCalls.some((call) => call.changes.status === 'completed')).toBe(true);
 	});
 });
+
+/**
+ * UI-01 / UI-02: run view data must come from SessionEngine getters — shared stem on the
+ * logical unit, per-step prompts and answer types, k-of-n from currentStepIndex / totalSteps.
+ */
+describe('run UI data contract', () => {
+	it('UI-01 / UI-02: shared stem stays on currentQuestion while step index and answer.type track the active step', async () => {
+		const sharedMarkdown = { type: 'markdown' as const, body: 'Shared stem for multi-step unit' };
+		const mixedQuestion: Question = {
+			id: 'q-ui-mixed',
+			question_set_id: 'qs1',
+			shared: { content: sharedMarkdown },
+			steps: [
+				{ text: 'First — open', answer: { type: 'open' } },
+				{
+					text: 'Second — multiple choice',
+					answer: { type: 'multiple-choice', options: ['A', 'B'], correctIndex: 0 }
+				}
+			],
+			text: 'First — open',
+			answer: { type: 'open' }
+		};
+		const repos = makeMockRepos();
+		const engine = new SessionEngine(
+			makeSession('active', 1),
+			[makeSessionStudent('s1', 1)],
+			[makeStudent('s1')],
+			[mixedQuestion],
+			[],
+			repos
+		);
+
+		expect(engine.currentQuestion?.shared?.content).toEqual(sharedMarkdown);
+		expect(engine.currentStepIndex).toBe(0);
+		expect(engine.totalSteps).toBe(2);
+		expect(engine.currentStep?.answer.type).toBe('open');
+
+		await engine.recordOutcome('correct');
+		expect(engine.currentQuestion?.shared?.content).toEqual(sharedMarkdown);
+		expect(engine.currentStepIndex).toBe(1);
+		expect(engine.currentStep?.answer.type).toBe('multiple-choice');
+	});
+
+	it('UI-01: single-step unit exposes Step 1 of 1 via totalSteps === 1 and currentStepIndex === 0', () => {
+		const repos = makeMockRepos();
+		const engine = new SessionEngine(
+			makeSession('active', 1),
+			[makeSessionStudent('s1', 1)],
+			[makeStudent('s1')],
+			[makeQuestion('q-single', 1)],
+			[],
+			repos
+		);
+
+		expect(engine.totalSteps).toBe(1);
+		expect(engine.currentStepIndex).toBe(0);
+	});
+});
