@@ -123,7 +123,12 @@ Plans:
 2. If **backup/export** exists, it **reads and writes** payloads **consistent** with the **new persisted question shape** (no hidden chain-era shape in export).
 3. **Pause/resume** behavior during a multi-step unit is **documented**, including **explicit limitations** if step position is not persisted across pause.
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+
+- [ ] 05-01-PLAN.md — VER-01: SessionEngine test traceability + single-step aggregate + progression titles
+- [ ] 05-02-PLAN.md — VER-02/VER-03: `buildFullBackupPayload`, backup Vitest + fake-indexeddb, README + settings pointer
 
 ## Progress
 
