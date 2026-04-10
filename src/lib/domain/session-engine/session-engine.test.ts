@@ -147,82 +147,139 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		expect(repos.updateSessionStudentCalls).toHaveLength(1);
 	});
 
-	it('all-correct outcomes aggregate to correct', async () => {
-		const repos = makeMockRepos();
-		const engine = new SessionEngine(
-			makeSession('active', 1),
-			[makeSessionStudent('s1', 1)],
-			[makeStudent('s1')],
-			[makeQuestion('q1', 2)],
-			[],
-			repos
-		);
+	describe('VER-01: aggregate scoring matrix', () => {
+		it('all-correct outcomes aggregate to correct', async () => {
+			const repos = makeMockRepos();
+			const engine = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q1', 2)],
+				[],
+				repos
+			);
 
-		await engine.recordOutcome('correct');
-		await engine.recordOutcome('correct');
+			await engine.recordOutcome('correct');
+			await engine.recordOutcome('correct');
 
-		expect(repos.createAttemptCalls).toHaveLength(1);
-		expect(repos.createAttemptCalls[0].outcome).toBe('correct');
-	});
-
-	it('all-wrong outcomes aggregate to wrong', async () => {
-		const repos = makeMockRepos();
-		const engine = new SessionEngine(
-			makeSession('active', 1),
-			[makeSessionStudent('s1', 1)],
-			[makeStudent('s1')],
-			[makeQuestion('q1', 2)],
-			[],
-			repos
-		);
-
-		await engine.recordOutcome('wrong');
-		await engine.recordOutcome('wrong');
-
-		expect(repos.createAttemptCalls).toHaveLength(1);
-		expect(repos.createAttemptCalls[0].outcome).toBe('wrong');
-	});
-
-	it('mixed correct and wrong outcomes aggregate to partial', async () => {
-		const repos = makeMockRepos();
-		const engine = new SessionEngine(
-			makeSession('active', 1),
-			[makeSessionStudent('s1', 1)],
-			[makeStudent('s1')],
-			[makeQuestion('q1', 3)],
-			[],
-			repos
-		);
-
-		await engine.recordOutcome('correct');
-		await engine.recordOutcome('wrong');
-		await engine.recordOutcome('correct');
-
-		expect(repos.createAttemptCalls).toHaveLength(1);
-		expect(repos.createAttemptCalls[0].outcome).toBe('partial');
-	});
-
-	it('resume restores root_question_id and step_index without draft Attempt', async () => {
-		const repos = makeMockRepos();
-		const resumedSession = makeSession('paused', 1, {
-			root_question_id: 'q-resume',
-			step_index: 1,
-			step_outcomes: ['correct'],
-			student_id: 's1'
+			expect(repos.createAttemptCalls).toHaveLength(1);
+			expect(repos.createAttemptCalls[0].outcome).toBe('correct');
 		});
-		const engine = new SessionEngine(
-			resumedSession,
-			[makeSessionStudent('s1', 1)],
-			[makeStudent('s1')],
-			[makeQuestion('q-resume', 3)],
-			[],
-			repos
-		);
 
-		expect(engine.currentQuestion?.id).toBe('q-resume');
-		expect(engine.currentStepIndex).toBe(1);
-		expect(engine.currentStep?.text).toContain('step 2');
-		expect(repos.createAttemptCalls).toHaveLength(0);
+		it('all-wrong outcomes aggregate to wrong', async () => {
+			const repos = makeMockRepos();
+			const engine = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q1', 2)],
+				[],
+				repos
+			);
+
+			await engine.recordOutcome('wrong');
+			await engine.recordOutcome('wrong');
+
+			expect(repos.createAttemptCalls).toHaveLength(1);
+			expect(repos.createAttemptCalls[0].outcome).toBe('wrong');
+		});
+
+		it('VER-01: mixed steps → partial (SESS-03)', async () => {
+			const repos = makeMockRepos();
+			const engine = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q1', 3)],
+				[],
+				repos
+			);
+
+			await engine.recordOutcome('correct');
+			await engine.recordOutcome('wrong');
+			await engine.recordOutcome('correct');
+
+			expect(repos.createAttemptCalls).toHaveLength(1);
+			expect(repos.createAttemptCalls[0].outcome).toBe('partial');
+		});
+
+		it('VER-01: single-step unit uses step outcome as aggregate (D-10)', async () => {
+			const reposCorrect = makeMockRepos();
+			const engineCorrect = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q-single-agg', 1)],
+				[],
+				reposCorrect
+			);
+			await engineCorrect.recordOutcome('correct');
+			expect(reposCorrect.createAttemptCalls).toHaveLength(1);
+			expect(reposCorrect.createAttemptCalls[0].outcome).toBe('correct');
+
+			const reposWrong = makeMockRepos();
+			const engineWrong = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q-single-agg', 1)],
+				[],
+				reposWrong
+			);
+			await engineWrong.recordOutcome('wrong');
+			expect(reposWrong.createAttemptCalls).toHaveLength(1);
+			expect(reposWrong.createAttemptCalls[0].outcome).toBe('wrong');
+		});
+	});
+
+	describe('VER-01: core step progression', () => {
+		it('VER-01: multi-step progression 0→1→2 before single Attempt', async () => {
+			const repos = makeMockRepos();
+			const engine = new SessionEngine(
+				makeSession('active', 1),
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q-progression', 3)],
+				[],
+				repos
+			);
+
+			expect(engine.currentStepIndex).toBe(0);
+			await engine.recordOutcome('correct');
+			expect(engine.currentStepIndex).toBe(1);
+			expect(repos.createAttemptCalls).toHaveLength(0);
+
+			await engine.recordOutcome('correct');
+			expect(engine.currentStepIndex).toBe(2);
+			expect(repos.createAttemptCalls).toHaveLength(0);
+
+			await engine.recordOutcome('correct');
+			expect(repos.createAttemptCalls).toHaveLength(1);
+			expect(repos.createAttemptCalls[0].question_id).toBe('q-progression');
+		});
+
+		it('VER-01: resume restores currentStepIndex without draft Attempt', async () => {
+			const repos = makeMockRepos();
+			const resumedSession = makeSession('paused', 1, {
+				root_question_id: 'q-resume',
+				step_index: 1,
+				step_outcomes: ['correct'],
+				student_id: 's1'
+			});
+			const engine = new SessionEngine(
+				resumedSession,
+				[makeSessionStudent('s1', 1)],
+				[makeStudent('s1')],
+				[makeQuestion('q-resume', 3)],
+				[],
+				repos
+			);
+
+			expect(engine.currentQuestion?.id).toBe('q-resume');
+			expect(engine.currentStepIndex).toBe(1);
+			expect(engine.currentStep?.text).toContain('step 2');
+			expect(repos.createAttemptCalls).toHaveLength(0);
+		});
 	});
 
 	it('restores current student from active_student_id (stable order, refresh-safe)', () => {
