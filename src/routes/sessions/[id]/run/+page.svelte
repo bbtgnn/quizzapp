@@ -1,4 +1,15 @@
 <script lang="ts">
+	/**
+	 * Live run UI — requirement traceability (Phase 4):
+	 * - **UI-01**, **UI-02**, **UI-03**: step index, total steps, current step text, and current
+	 *   logical question view come **only** from `SessionEngine` (`currentStepIndex`, `totalSteps`,
+	 *   `currentStep`, `currentQuestion`) per D-05 in `04-CONTEXT.md`.
+	 * - **No local authoritative `stepIndex` state** — reactive display is derived from engine
+	 *   getters plus the existing `tick` refresh after async outcomes only.
+	 * - **UI-02**: interaction UI is selected by `currentAnswer?.type` (`open` / `multiple-choice` /
+	 *   `true-false`) from engine-derived `currentStep` / `currentQuestion`; see `{#if}` branches and
+	 *   `handleMCOption` / `handleTFButton` below.
+	 */
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { SessionEngine } from '$lib/domain/session-engine/index.js';
