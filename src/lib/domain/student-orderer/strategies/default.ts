@@ -1,15 +1,6 @@
 import type { StudentOrderStrategy } from '../types.js';
 import type { Student, SessionStudent } from '$lib/model/types.js';
 
-function fisherYatesShuffle<T>(arr: T[]): T[] {
-	const result = [...arr];
-	for (let i = result.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[result[i], result[j]] = [result[j], result[i]];
-	}
-	return result;
-}
-
 const defaultStrategy: StudentOrderStrategy = {
 	order(students: Student[], sessionStudents: SessionStudent[]): Student[] {
 		const completedIds = new Set<string>();
@@ -20,7 +11,8 @@ const defaultStrategy: StudentOrderStrategy = {
 		}
 
 		const remaining = students.filter((s) => !completedIds.has(s.id));
-		return fisherYatesShuffle(remaining);
+		// Stable by id so session resume / refresh does not reshuffle turn order (see SessionEngine).
+		return [...remaining].sort((a, b) => a.id.localeCompare(b.id));
 	}
 };
 

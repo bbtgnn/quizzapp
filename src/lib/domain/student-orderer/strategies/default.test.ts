@@ -17,8 +17,8 @@ const makeSessionStudent = (studentId: string, completed: boolean): SessionStude
 });
 
 describe('defaultStrategy.order', () => {
-	it('all students remaining: returns all students in some valid permutation', () => {
-		const students = [makeStudent('s1'), makeStudent('s2'), makeStudent('s3')];
+	it('all students remaining: returns all students sorted by id (stable for session resume)', () => {
+		const students = [makeStudent('s3'), makeStudent('s1'), makeStudent('s2')];
 		const sessionStudents = [
 			makeSessionStudent('s1', false),
 			makeSessionStudent('s2', false),
@@ -27,9 +27,7 @@ describe('defaultStrategy.order', () => {
 
 		const result = defaultStrategy.order(students, sessionStudents);
 
-		expect(result).toHaveLength(3);
-		const ids = result.map((s) => s.id).sort();
-		expect(ids).toEqual(['s1', 's2', 's3']);
+		expect(result.map((s) => s.id)).toEqual(['s1', 's2', 's3']);
 	});
 
 	it('some students completed: returns only the remaining student', () => {
@@ -65,30 +63,12 @@ describe('defaultStrategy.order', () => {
 		expect(result[0].id).toBe('s2');
 	});
 
-	it('no SessionStudent records: all students treated as remaining, returns all shuffled', () => {
-		const students = [makeStudent('s1'), makeStudent('s2'), makeStudent('s3')];
+	it('no SessionStudent records: all students treated as remaining, sorted by id', () => {
+		const students = [makeStudent('s3'), makeStudent('s1'), makeStudent('s2')];
 		const sessionStudents: SessionStudent[] = [];
 
 		const result = defaultStrategy.order(students, sessionStudents);
 
-		expect(result).toHaveLength(3);
-		const ids = result.map((s) => s.id).sort();
-		expect(ids).toEqual(['s1', 's2', 's3']);
-	});
-
-	it('shuffle is random: 10 calls on a large list produce at least two different orderings', () => {
-		const students = Array.from({ length: 20 }, (_, i) => makeStudent(`s${i}`));
-		const sessionStudents: SessionStudent[] = [];
-
-		const orderings = Array.from({ length: 10 }, () =>
-			defaultStrategy
-				.order(students, sessionStudents)
-				.map((s) => s.id)
-				.join(',')
-		);
-
-		const unique = new Set(orderings);
-		// With 20 students (20! permutations), the probability of all 10 being identical is negligible
-		expect(unique.size).toBeGreaterThan(1);
+		expect(result.map((s) => s.id)).toEqual(['s1', 's2', 's3']);
 	});
 });

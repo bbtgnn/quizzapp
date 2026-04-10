@@ -80,10 +80,14 @@ export interface Session {
 	completed_at: number | null; // Unix timestamp (ms) or null
 	status: 'active' | 'paused' | 'completed';
 	strategy_id: string;
+	/** Whose turn it is; persisted so refresh does not reshuffle the play order. */
+	active_student_id?: string | null;
 	active_unit_progress: {
 		root_question_id: string;
 		step_index: number;
 		step_outcomes: Array<'correct' | 'wrong'>;
+		/** Present for in-progress units; used with active_student_id for resume. */
+		student_id?: string;
 	} | null;
 }
 

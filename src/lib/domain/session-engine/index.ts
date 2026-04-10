@@ -53,6 +53,13 @@ export class SessionEngine {
 		this._orderedStudents = orderer.order(students, activeSessionStudents);
 
 		this._currentIndex = 0;
+		const turnStudentId =
+			session.active_unit_progress?.student_id ?? session.active_student_id ?? undefined;
+		if (turnStudentId) {
+			const idx = this._orderedStudents.findIndex((s) => s.id === turnStudentId);
+			if (idx >= 0) this._currentIndex = idx;
+		}
+
 		if (session.active_unit_progress) {
 			const root = this._questions.find(
 				(q) => q.id === session.active_unit_progress?.root_question_id
@@ -73,6 +80,14 @@ export class SessionEngine {
 		if (!this._activeRootQuestion) {
 			this._activeRootQuestion = this._pickQuestion();
 		}
+
+		void this._syncActiveStudentId();
+	}
+
+	private async _syncActiveStudentId(): Promise<void> {
+		await this._updateSession(this._session.id, {
+			active_student_id: this.currentStudent?.id ?? null
+		});
 	}
 
 	get currentStudent(): Student | null {
@@ -101,8 +116,15 @@ export class SessionEngine {
 	}
 
 	get currentStep(): Question['steps'][number] | null {
-		if (!this._activeRootQuestion) return null;
-		return this._activeRootQuestion.steps[this._currentStepIndex] ?? null;
+		const root = this._activeRootQuestion;
+		if (!root) return null;
+		const explicitStep = root.steps[this._currentStepIndex];
+		if (explicitStep) return explicitStep;
+		// Transitional fallback for legacy records that may still rely on root-level text/answer.
+		if (root.text && root.answer) {
+			return { text: root.text, answer: root.answer };
+		}
+		return null;
 	}
 
 	get currentStepIndex(): number {
@@ -110,7 +132,10 @@ export class SessionEngine {
 	}
 
 	get totalSteps(): number {
-		return this._activeRootQuestion?.steps.length ?? 0;
+		const root = this._activeRootQuestion;
+		if (!root) return 0;
+		if (root.steps.length > 0) return root.steps.length;
+		return root.text && root.answer ? 1 : 0;
 	}
 
 	get chainProgress(): { current: number; total: number } | null {
@@ -156,7 +181,8 @@ export class SessionEngine {
 			await this._persistActiveUnitState(this._session.id, {
 				root_question_id: this._activeRootQuestion.id,
 				step_index: this._currentStepIndex,
-				step_outcomes: [...this._stepOutcomes]
+				step_outcomes: [...this._stepOutcomes],
+				student_id: this.currentStudent.id
 			});
 			return;
 		}
@@ -175,7 +201,8 @@ export class SessionEngine {
 		this._activeRootQuestion = null;
 		this._currentStepIndex = 0;
 		this._stepOutcomes = [];
-		await this._consumeSlot(this.currentStudent);
+		const finishedStudent = this.currentStudent;
+		await this._consumeSlot(finishedStudent!);
 	}
 
 	async skipCurrentUnit(): Promise<void> {
@@ -184,7 +211,8 @@ export class SessionEngine {
 		this._activeRootQuestion = null;
 		this._currentStepIndex = 0;
 		this._stepOutcomes = [];
-		await this._consumeSlot(this.currentStudent);
+		const skippedFor = this.currentStudent;
+		await this._consumeSlot(skippedFor);
 	}
 
 	async pause(): Promise<void> {
@@ -192,10 +220,14 @@ export class SessionEngine {
 			await this._persistActiveUnitState(this._session.id, {
 				root_question_id: this._activeRootQuestion.id,
 				step_index: this._currentStepIndex,
-				step_outcomes: [...this._stepOutcomes]
+				step_outcomes: [...this._stepOutcomes],
+				student_id: this.currentStudent!.id
 			});
 		}
-		await this._updateSession(this._session.id, { status: 'paused' });
+		await this._updateSession(this._session.id, {
+			status: 'paused',
+			active_student_id: this.currentStudent?.id ?? null
+		});
 	}
 
 	private async _consumeSlot(student: Student): Promise<void> {
@@ -211,7 +243,9 @@ export class SessionEngine {
 			if (this.isComplete || this._currentIndex >= this._orderedStudents.length) {
 				await this._updateSession(this._session.id, {
 					status: 'completed',
-					completed_at: Date.now()
+					completed_at: Date.now(),
+					active_student_id: null,
+					active_unit_progress: null
 				});
 			} else {
 				this._activeRootQuestion = this._pickQuestion();
@@ -226,6 +260,8 @@ export class SessionEngine {
 			this._currentStepIndex = 0;
 			this._stepOutcomes = [];
 		}
+
+		await this._syncActiveStudentId();
 	}
 
 	private _computeAggregateOutcome(

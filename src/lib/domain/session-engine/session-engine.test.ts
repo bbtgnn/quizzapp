@@ -32,7 +32,8 @@ const makeSessionStudent = (
 const makeSession = (
 	status: Session['status'] = 'active',
 	nQuestions = 1,
-	activeUnitProgress: Session['active_unit_progress'] = null
+	activeUnitProgress: Session['active_unit_progress'] = null,
+	activeStudentId: Session['active_student_id'] = undefined
 ): Session => ({
 	id: 'sess1',
 	classroom_id: 'c1',
@@ -42,6 +43,7 @@ const makeSession = (
 	completed_at: null,
 	status,
 	strategy_id: 'default',
+	active_student_id: activeStudentId,
 	active_unit_progress: activeUnitProgress
 });
 
@@ -91,6 +93,34 @@ function makeMockRepos() {
 }
 
 describe('SessionEngine logical-unit progression and scoring', () => {
+	it('falls back to root-level text/answer when a legacy question has no steps', async () => {
+		const repos = makeMockRepos();
+		const legacyQuestion: Question = {
+			id: 'q-legacy',
+			question_set_id: 'qs1',
+			shared: { content: { type: 'code-snippet', language: 'ts', code: 'const x = 1;' } },
+			steps: [],
+			text: 'Legacy question text',
+			answer: { type: 'open' }
+		};
+		const engine = new SessionEngine(
+			makeSession('active', 1),
+			[makeSessionStudent('s1', 1)],
+			[makeStudent('s1')],
+			[legacyQuestion],
+			[],
+			repos
+		);
+
+		expect(engine.currentQuestion?.id).toBe('q-legacy');
+		expect(engine.currentStep?.text).toBe('Legacy question text');
+		expect(engine.totalSteps).toBe(1);
+
+		await engine.recordOutcome('correct');
+		expect(repos.createAttemptCalls).toHaveLength(1);
+		expect(repos.createAttemptCalls[0].question_id).toBe('q-legacy');
+	});
+
 	it('multi-step unit consumes one slot and emits one Attempt only after final step', async () => {
 		const students = [makeStudent('s1')];
 		const questions = [makeQuestion('q-multi', 3)];
@@ -177,7 +207,8 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		const resumedSession = makeSession('paused', 1, {
 			root_question_id: 'q-resume',
 			step_index: 1,
-			step_outcomes: ['correct']
+			step_outcomes: ['correct'],
+			student_id: 's1'
 		});
 		const engine = new SessionEngine(
 			resumedSession,
@@ -192,6 +223,23 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		expect(engine.currentStepIndex).toBe(1);
 		expect(engine.currentStep?.text).toContain('step 2');
 		expect(repos.createAttemptCalls).toHaveLength(0);
+	});
+
+	it('restores current student from active_student_id (stable order, refresh-safe)', () => {
+		const repos = makeMockRepos();
+		const students = [makeStudent('s2'), makeStudent('s1')];
+		const sessionStudents = [makeSessionStudent('s1', 1), makeSessionStudent('s2', 1)];
+		const session = makeSession('active', 1, null, 's2');
+		const engine = new SessionEngine(
+			session,
+			sessionStudents,
+			students,
+			[makeQuestion('q1', 1), makeQuestion('q2', 1)],
+			[],
+			repos
+		);
+
+		expect(engine.currentStudent?.id).toBe('s2');
 	});
 
 	it('skip mid-unit creates no Attempt and skipped unit is not reinserted in same session', async () => {
