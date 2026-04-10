@@ -101,7 +101,11 @@ Plans:
 2. The user can submit answers for each step using **open**, **multiple-choice**, or **true/false** interactions **as defined for that step**.
 3. The run UI **does not** keep a separate **authoritative** step index that can **desync** from the engine.
 
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 04-01-PLAN.md — Verify UI-01–UI-03: engine run contract tests + run page traceability (minimal UI change per 04-CONTEXT)
 
 **UI hint**: yes
 
