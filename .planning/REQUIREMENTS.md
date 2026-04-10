@@ -27,9 +27,9 @@
 
 ### Live session UI
 
-- [ ] **UI-01**: Run experience shows **shared stem/context** (when present) and the **current step**, including **clear k-of-n** progression tied to engine state.
-- [ ] **UI-02**: User can answer each step using the existing **open / multiple-choice / true-false** interactions as defined for that step.
-- [ ] **UI-03**: Run UI does **not** maintain a separate authoritative step index that can **desync** from the engine.
+- [x] **UI-01**: Run experience shows **shared stem/context** (when present) and the **current step**, including **clear k-of-n** progression tied to engine state.
+- [x] **UI-02**: User can answer each step using the existing **open / multiple-choice / true-false** interactions as defined for that step.
+- [x] **UI-03**: Run UI does **not** maintain a separate authoritative step index that can **desync** from the engine.
 
 ### Verification & lifecycle
 
@@ -77,9 +77,9 @@ Which phases cover which requirements — updated during roadmap creation.
 | SESS-02 | Phase 3 | Complete |
 | SESS-03 | Phase 3 | Pending |
 | SESS-04 | Phase 3 | Complete |
-| UI-01 | Phase 4 | Pending |
-| UI-02 | Phase 4 | Pending |
-| UI-03 | Phase 4 | Pending |
+| UI-01 | Phase 4 | Complete |
+| UI-02 | Phase 4 | Complete |
+| UI-03 | Phase 4 | Complete |
 | VER-01 | Phase 5 | Pending |
 | VER-02 | Phase 5 | Pending |
 | VER-03 | Phase 5 | Pending |

@@ -18,6 +18,7 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 - ✓ **Live sessions** with SessionEngine, strategies for question selection and student ordering — existing
 - ✓ **Attempts** persisted with outcomes `correct` | `partial` | `wrong` — existing
 - ✓ **Open, multiple-choice, and true/false** answer types — existing
+- ✓ **Live run UI** shows shared stem (when present), current step, and k-of-n from `SessionEngine` only; interaction types follow each step — validated in Phase 4 (UI-01–UI-03)
 - ✓ **Markdown and code-snippet** question content with highlighting — existing
 - ✓ **Question chains** (parent + `chain_order` children, JSON `chain` array) — existing *(scheduled for replacement in this milestone)*
 
@@ -75,4 +76,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after initialization (next-milestone: multi-step questions)*
+*Last updated: 2026-04-10 — Phase 4 complete (live session run UI / UI-01–UI-03)*

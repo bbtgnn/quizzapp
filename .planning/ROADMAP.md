@@ -105,7 +105,7 @@ Plans:
 
 Plans:
 
-- [ ] 04-01-PLAN.md — Verify UI-01–UI-03: engine run contract tests + run page traceability (minimal UI change per 04-CONTEXT)
+- [x] 04-01-PLAN.md — Verify UI-01–UI-03: engine run contract tests + run page traceability (minimal UI change per 04-CONTEXT)
 
 **UI hint**: yes
 
