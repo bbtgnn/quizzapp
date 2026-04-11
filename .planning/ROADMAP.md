@@ -8,15 +8,15 @@ This milestone replaces chain-linked question rows with **one logical question p
 
 **Phase Numbering:**
 
-- Integer phases (1, 2, 3): Planned milestone work
+- Integer phases (1–5): Planned milestone work for this roadmap
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Domain model & import contract** — Logical question + step unions, Zod at import boundary, bundled `question-sets/` migrated
-- [ ] **Phase 2: IndexedDB & persistence** — One stored row per logical question, no fan-out, schema bump + wipe documented
-- [ ] **Phase 3: Session engine & aggregate scoring** — Logical pool slots, engine-owned step progression, aggregate outcomes, one Attempt per unit
-- [ ] **Phase 4: Live session run UI** — Stem + current step + k-of-n from engine; per-step interactions; no authoritative duplicate step index
+- [x] **Phase 1: Domain model & import contract** — Logical question + step unions, Zod at import boundary, bundled `question-sets/` migrated
+- [x] **Phase 2: IndexedDB & persistence** — One stored row per logical question, no fan-out, schema bump + wipe documented
+- [x] **Phase 3: Session engine & aggregate scoring** — Logical pool slots, engine-owned step progression, aggregate outcomes, one Attempt per unit
+- [x] **Phase 4: Live session run UI** — Stem + current step + k-of-n from engine; per-step interactions; no authoritative duplicate step index
 - [x] **Phase 5: Verification, export & lifecycle** — Scoring/progression tests, backup/export parity, pause/resume documented
 
 ## Phase Details
@@ -138,8 +138,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Domain model & import contract | 0/4 | Not started | - |
-| 2. IndexedDB & persistence | 0/TBD | Not started | - |
-| 3. Session engine & aggregate scoring | 0/TBD | Not started | - |
-| 4. Live session run UI | 0/TBD | Not started | - |
+| 1. Domain model & import contract | 4/4 | Complete | 2026-04-09 |
+| 2. IndexedDB & persistence | 3/3 | Complete | 2026-04-09 |
+| 3. Session engine & aggregate scoring | 2/2 | Complete | 2026-04-09 |
+| 4. Live session run UI | 1/1 | Complete | 2026-04-10 |
 | 5. Verification, export & lifecycle | 2/2 | Complete | 2026-04-11 |
