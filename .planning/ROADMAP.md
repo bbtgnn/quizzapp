@@ -127,8 +127,8 @@ Plans:
 
 Plans:
 
-- [ ] 05-01-PLAN.md — VER-01: SessionEngine test traceability + single-step aggregate + progression titles
-- [ ] 05-02-PLAN.md — VER-02/VER-03: `buildFullBackupPayload`, backup Vitest + fake-indexeddb, README + settings pointer
+- [x] 05-01-PLAN.md — VER-01: SessionEngine test traceability + single-step aggregate + progression titles
+- [x] 05-02-PLAN.md — VER-02/VER-03: `buildFullBackupPayload`, backup Vitest + fake-indexeddb, README + settings pointer
 
 ## Progress
 
