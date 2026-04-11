@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: IndexedDB & persistence** — One stored row per logical question, no fan-out, schema bump + wipe documented
 - [ ] **Phase 3: Session engine & aggregate scoring** — Logical pool slots, engine-owned step progression, aggregate outcomes, one Attempt per unit
 - [ ] **Phase 4: Live session run UI** — Stem + current step + k-of-n from engine; per-step interactions; no authoritative duplicate step index
-- [ ] **Phase 5: Verification, export & lifecycle** — Scoring/progression tests, backup/export parity, pause/resume documented
+- [x] **Phase 5: Verification, export & lifecycle** — Scoring/progression tests, backup/export parity, pause/resume documented
 
 ## Phase Details
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. IndexedDB & persistence | 0/TBD | Not started | - |
 | 3. Session engine & aggregate scoring | 0/TBD | Not started | - |
 | 4. Live session run UI | 0/TBD | Not started | - |
-| 5. Verification, export & lifecycle | 0/TBD | Not started | - |
+| 5. Verification, export & lifecycle | 2/2 | Complete | 2026-04-11 |
