@@ -48,3 +48,9 @@ This milestone introduces a Dexie v3 schema cutover for persisted questions.
 - IndexedDB wipe: browser-local IndexedDB data may be reset after the upgrade.
 - no migration: chain-era persisted rows are not migrated to the new logical-question shape.
 - Recovery path: if local question sets are missing after upgrade, re-import your JSON files.
+
+## Sessions, pause, and resume
+
+VER-03: During a live session, **SessionEngine** can pause and resume progress on the **current multi-step question** when persisted session state restores **`active_unit_progress`**—you stay on the same logical unit and step after a reload or when returning to a paused session.
+
+**Limitations:** Clearing site data or an IndexedDB upgrade wipe removes local session state, so in-progress units cannot be resumed from the browser alone. Importing a backup with an unsupported version is rejected (no legacy backup migration); see backup errors in Settings. Closing the browser before state is written to IndexedDB may lose the latest progress—treat the app as persisted only after Dexie writes complete.

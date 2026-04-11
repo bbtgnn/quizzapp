@@ -54,7 +54,8 @@
 		<h2 class="text-xl font-semibold text-gray-900">Export Data</h2>
 		<p class="mt-2 text-sm text-gray-600">
 			Download a JSON backup of all your classrooms, students, question sets, sessions, and
-			attempts. You can use this file to restore your data later.
+			attempts. You can use this file to restore your data later. Session pause/resume and its
+			limits are documented in the README under <strong>Sessions, pause, and resume</strong>.
 		</p>
 		<div class="mt-4">
 			<button
@@ -72,6 +73,8 @@
 		<p class="mt-2 text-sm text-gray-600">
 			Restore data from a previously exported JSON backup file.
 			<strong class="text-red-600">Warning:</strong> This will permanently replace all existing data.
+			See the README section <strong>Sessions, pause, and resume</strong> for how live sessions persist
+			and when backup import may fail (unsupported versions).
 		</p>
 
 		{#if importError}

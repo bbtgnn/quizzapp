@@ -1,6 +1,6 @@
 import { db } from './schema.js';
 
-export async function exportFullBackup(): Promise<void> {
+export async function buildFullBackupPayload() {
 	const [
 		classrooms,
 		students,
@@ -19,8 +19,8 @@ export async function exportFullBackup(): Promise<void> {
 		db.attempts.toArray()
 	]);
 
-	const data = {
-		version: 2,
+	return {
+		version: 2 as const,
 		exportedAt: Date.now(),
 		classrooms,
 		students,
@@ -30,6 +30,10 @@ export async function exportFullBackup(): Promise<void> {
 		sessionStudents,
 		attempts
 	};
+}
+
+export async function exportFullBackup(): Promise<void> {
+	const data = await buildFullBackupPayload();
 
 	const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 	const url = URL.createObjectURL(blob);
