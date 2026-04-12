@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
+milestone_name: Multi-step questions
 status: idle
-stopped_at: Milestone v1.0 — all 5 phases complete (12/12 plans)
-last_updated: "2026-04-11T12:45:00.000Z"
-last_activity: 2026-04-11
+stopped_at: v1.0 shipped and archived — use /gsd-new-milestone for v1.1+ scope.
+last_updated: "2026-04-12T14:22:32.643Z"
+last_activity: 2026-04-12
 progress:
   total_phases: 5
   completed_phases: 5
@@ -18,21 +18,21 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-11)
+See: `.planning/PROJECT.md` (updated 2026-04-12)
 
 **Core value:** Teachers can run fair, understandable live quizzes where each drawn item is one clear unit—possibly several steps—without a separate chain-question concept complicating the model, import format, or session logic.
 
-**Current focus:** Milestone v1.0 roadmap complete — next work is a new milestone or backlog (see `ROADMAP.md`).
+**Current focus:** v1.0 shipped — planning next milestone (`/gsd-new-milestone`); see `ROADMAP.md` and `MILESTONES.md`.
 
 ## Current Position
 
-Phase: 5 (final) — complete
+Phase: — (between milestones)
 
-Plan: 12/12 plans done across phases 1–5
+Plan: —
 
-Status: Milestone complete
+Status: v1.0 archived; no active phase
 
-Last activity: 2026-04-11
+Last activity: 2026-04-12
 
 Progress: [██████████] 100%
 
@@ -78,8 +78,8 @@ None yet.
 
 ## Session continuity
 
-Last session: 2026-04-11
+Last session: 2026-04-12
 
-Stopped at: Milestone v1.0 complete — no active phase resume file required.
+Stopped at: v1.0 milestone complete — tagged; resume with /gsd-new-milestone when ready.
 
 Resume file: —
