@@ -112,3 +112,32 @@
 		opacity: 0.4;
 	}
 }
+
+/*
+ * Max-width utilities read the same --spacing-* keys as gap/padding (Tailwind v4).
+ * Our TOK-01 scale uses xs..3xl for 4px-grid *gaps*, so e.g. --spacing-2xl = 3rem,
+ * which would make max-w-2xl ≈ 48px. Restore usual layout widths for max-w-*.
+ */
+@layer utilities {
+	.max-w-xs {
+		max-width: 20rem;
+	}
+	.max-w-sm {
+		max-width: 24rem;
+	}
+	.max-w-md {
+		max-width: 28rem;
+	}
+	.max-w-lg {
+		max-width: 32rem;
+	}
+	.max-w-xl {
+		max-width: 36rem;
+	}
+	.max-w-2xl {
+		max-width: 42rem;
+	}
+	.max-w-3xl {
+		max-width: 48rem;
+	}
+}
