@@ -26,13 +26,21 @@ See: `.planning/PROJECT.md` (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 7 — funnel-shell-&-classroom-selection
+**Current Phase:** 7
+**Current Phase Name:** funnel shell & classroom selection
+**Current Plan:** Not started
+**Total Plans in Phase:** 0
+**Status:** Ready to plan
+**Progress:** 20%
+**Last Activity:** 2026-04-12
+**Last Activity Description:** Phase 6 complete — verification passed; ready to discuss or plan Phase 7
+**Completed Phases:** 1
+**Total Phases:** 5
 
+Phase: 7 — funnel shell & classroom selection
 Plan: Not started
-
-Status: Phase 6 complete; ready to discuss or plan Phase 7
-
-Last activity: 2026-04-12
+Status: Ready to plan
+Last activity: 2026-04-12 — Phase 6 complete; next: Phase 7
 
 Progress: [██░░░░░░░░] 20%
 
