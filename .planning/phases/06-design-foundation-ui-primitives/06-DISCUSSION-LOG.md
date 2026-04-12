@@ -101,3 +101,5 @@ None recorded.
 ## Amendments (post-discussion)
 
 **2026-04-12** — User additions merged into `06-CONTEXT.md` (not re-interactive): animated CSS stage background (e.g. sliding grid) with reduced-motion fallback; white question cards + dark in-card text; answer buttons outside card with distinct colors per option, centered card when no buttons; `html { font-size: 112.5%; }` for uniform Tailwind rem scale; large custom cursor with touch/focus safeguards.
+
+**2026-04-12 (b)** — Answer feedback: distinct animations on answer (examples: confetti for good, card shake for errors); CSS/Svelte first; **anime.js** optional when needed; `prefers-reduced-motion` degrades to minimal/static feedback.

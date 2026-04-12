@@ -41,8 +41,12 @@ Deliver a **shared visual system** for upcoming funnel and run restyles: **theme
 ### Pointer & chrome
 - **D-16:** **Large custom cursor** on quiz-show **in-scope** surfaces where it fits the aesthetic; **must not break usability** — omit or fall back to default on **`pointer: coarse`** (touch) and preserve **visible focus** styles for keyboard users. Cursor graphic and hotspot: **Claude’s discretion**.
 
+### Answer feedback motion (run / style-lab)
+- **D-17:** **Different treatment after answering** — **positive** outcomes get **celebratory feedback** (e.g. **confetti** or equivalent burst); **negative** outcomes get **clear “wrong” affordance** (e.g. **question card shake** or similar). These are **examples**, not an exhaustive list — same *class* of juice (success vs error) must read instantly.
+- **D-18:** **Implementation stack:** prefer **CSS / Svelte transitions / Web Animations** first. Use **[anime.js](https://animejs.com/)** (or similar small animation lib) **only when needed** for sequencing or effects that are impractical in CSS — **justify in the plan** (bundle size, where it loads). **`prefers-reduced-motion: reduce`:** replace confetti/shake with **minimal or no motion** (e.g. brief color flash, static icon, or instant state change only).
+
 ### Claude's Discretion
-- Specific **token names**, **palette values** (including **per-answer accent colors**), **shadow/radius scales**, **secondary/tertiary** exact styles, **webfont choice** (within rounded-friendly brief), **style-lab route path**, **sliding-grid** implementation details, **cursor** asset, and **non-stage** motion (Phase 10 micro-interactions — stage background animation covered by **D-13**).
+- Specific **token names**, **palette values** (including **per-answer accent colors**), **shadow/radius scales**, **secondary/tertiary** exact styles, **webfont choice** (within rounded-friendly brief), **style-lab route path**, **sliding-grid** implementation details, **cursor** asset, **confetti/shake** (or alt FX) specifics, **whether anime.js** ships vs CSS-only, and **other** motion polish (Phase 10 — e.g. page transitions; stage background remains **D-13**).
 
 </decisions>
 
@@ -88,6 +92,7 @@ Deliver a **shared visual system** for upcoming funnel and run restyles: **theme
 - **White question card, dark type inside**; **colorful answer pills outside** the card (or **centered card only** when no choices).
 - **Root `font-size: 112.5%`** for a globally **bigger** UI via Tailwind rem tokens.
 - **Oversized custom cursor** on pointer devices for extra “show” feel.
+- **Answer moment:** e.g. **confetti** (or similar) on **correct**; **card shake** (or similar) on **wrong** — **reduced-motion** gets quiet feedback; **anime.js** only if CSS is not enough.
 
 </specifics>
 
