@@ -36,7 +36,13 @@
 3. **Button** + **panel** primitives proven on a small pilot surface.
 4. Short **docs** on applying tokens.
 
-**Plans:** `/gsd-plan-phase 6`
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 06-01-PLAN.md — TOK-01: `@theme` tokens, typography `@utility` roles, `html` 112.5%, CSS stage motion + reduced-motion fallback in `layout.css`
+- [ ] 06-02-PLAN.md — CMP-01: `Button.svelte` + `Panel.svelte` + Vitest browser specs
+- [ ] 06-03-PLAN.md — `/style-lab` pilot (tokens + primitives + D-16/D-17 demos) + `docs/design-tokens.md`
 
 ### Phase 7: Funnel shell & classroom selection
 
@@ -106,7 +112,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 6. Design foundation & UI primitives | v1.1 | 0/TBD | Not started | — |
+| 6. Design foundation & UI primitives | v1.1 | 0/3 | Not started | — |
 | 7. Funnel shell & classroom selection | v1.1 | 0/TBD | Not started | — |
 | 8. Question set selection | v1.1 | 0/TBD | Not started | — |
 | 9. Live session run | v1.1 | 0/TBD | Not started | — |
