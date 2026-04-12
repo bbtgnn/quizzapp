@@ -22,6 +22,7 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 
 - **Shipped v1.0** (2026-04-12): multi-step logical questions end-to-end — import contract (Zod), Dexie v3 one-row-per-unit persistence, SessionEngine progression and scoring, run UI bound to engine state, tests and backup/export parity, pause/resume documentation.
 - **In progress v1.1:** UI-only milestone, **scoped to the live quiz funnel**; management screens remain visually basic. No change to logical-question schema or SessionEngine contracts unless a style need forces a minimal presentation tweak (avoid behavioral changes).
+- **Phase 6 complete** (2026-04-12): **TOK-01** tokens and typography in `layout.css`, **CMP-01** `Button` / `Panel` primitives with Vitest browser coverage, **`/style-lab`** pilot, and `docs/design-tokens.md`.
 
 ## Next milestone goals
 
@@ -52,6 +53,8 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 - ✓ **Session pool** uses logical question ids; **SessionEngine** owns progression; **aggregate outcomes**; **one Attempt** per unit — **v1.0** (SESS-01–04)
 - ✓ **Live run UI** tied to engine (stem, step, k-of-n) — **v1.0** (UI-01–UI-03)
 - ✓ **VER-01–VER-03** — labeled engine tests, backup parity, pause/resume docs — **v1.0**
+- ✓ **TOK-01** — design tokens + typography roles + stage shell in `layout.css` — **v1.1 Phase 6**
+- ✓ **CMP-01** — shared `Button` / `Panel` primitives — **v1.1 Phase 6**
 
 ### Active
 
@@ -98,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 **After each milestone** (via `/gsd-complete-milestone`): full review, validated vs active refresh, context and next goals.
 
 ---
-*Last updated: 2026-04-12 — v1.1 scope narrowed to classroom → sets → run funnel*
+*Last updated: 2026-04-12 — Phase 6 design foundation complete (TOK-01, CMP-01)*
