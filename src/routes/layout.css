@@ -75,3 +75,40 @@
 	font-weight: 600;
 	line-height: 1.5;
 }
+
+/* D-13: stage backdrop — CSS-only motif; D-18: reduced-motion safe */
+.stage-quiz-show {
+	position: relative;
+	min-height: 100vh;
+	background-color: var(--color-stage);
+	color: var(--color-stage-foreground);
+	overflow-x: hidden;
+}
+
+.stage-quiz-show::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+	background-size: 48px 48px;
+	animation: stage-quiz-show-grid-drift 24s linear infinite;
+	pointer-events: none;
+}
+
+@keyframes stage-quiz-show-grid-drift {
+	0% {
+		transform: translate(0, 0);
+	}
+	100% {
+		transform: translate(48px, 48px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.stage-quiz-show::before {
+		animation: none;
+		opacity: 0.4;
+	}
+}
