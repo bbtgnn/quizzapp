@@ -4,13 +4,25 @@
 
 A **browser-only** quiz application for teachers: **classrooms**, **students**, **imported question sets**, and **live sessions** with a **SessionEngine** that drives turn order and scoring. The stack is **SvelteKit** (client-only routes), **IndexedDB via Dexie**, and a **ports-and-adapters** boundary around persistence. **v1.0** delivered the **logical question** model: one pool unit with **ordered, discriminated steps**, **aggregate session outcomes**, migrated bundled JSON, and engine-authoritative run UI.
 
+## Current Milestone: v1.1 Quiz show UI
+
+**Goal:** Replace the plain default look with a **game / quiz show** visual experience—**bold color**, **large controls**, **expressive typography**, and **juicy** motion and feedback—while keeping v1.0 session semantics intact.
+
+**Target features:**
+
+- **Quiz-show visual language** — saturated palette, stage-like panels, clear hierarchy, “broadcast” energy.
+- **Oversized, tactile controls** — primary flows easy to hit and read at a glance (classroom + live run).
+- **Motion & feedback** — purposeful transitions and micro-interactions; **respect `prefers-reduced-motion`**.
+- **Full-surface coverage** — all primary teacher routes and the **live run** restyled; empty/error states and shell chrome included.
+
 ## Current state
 
 - **Shipped v1.0** (2026-04-12): multi-step logical questions end-to-end — import contract (Zod), Dexie v3 one-row-per-unit persistence, SessionEngine progression and scoring, run UI bound to engine state, tests and backup/export parity, pause/resume documentation.
+- **In progress v1.1:** UI-only milestone; no change to logical-question schema or SessionEngine contracts unless a style need forces a minimal presentation tweak (avoid behavioral changes).
 
 ## Next milestone goals
 
-- Define with **`/gsd-new-milestone`**: fresh requirements and phased roadmap. Likely candidates from deferred lists: richer **authoring** (AUTH-01), **analytics** (ANLY-01), **weighted / branching steps** (ADVN-01/02), or product polish — prioritize after the next planning pass.
+- After v1.1: candidates from the backlog include **authoring** (AUTH-01), **analytics** (ANLY-01), **advanced assessment** (ADVN-01/02), or further polish — pick with `/gsd-new-milestone`.
 
 ## Core Value
 
@@ -40,25 +52,27 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 
 ### Active
 
-- [ ] **Next milestone scope** — capture via `/gsd-new-milestone` (see v2 ideas in archived requirements under “Deferred”).
+- [ ] **v1.1 quiz-show restyle** — see `.planning/REQUIREMENTS.md` (TOK/CMP/SHL/RTE/RUN/MOT/POL).
 
 ### Out of Scope
 
 - **Server sync, accounts, multi-device continuity** — local-first app remains as today.
-- **Full authoring UI redesign** beyond minimal needs for import/testing — unchanged unless a future milestone selects it.
-- **Partial credit per step** (weighted steps) in v1 — v1 only used three aggregate outcomes; ADVN items stay deferred until a milestone adopts them.
+- **New assessment rules or question types** — visual milestone only; no weighted steps or branching unless explicitly added later.
+- **Sound effects / audio** — optional follow-up; v1.1 is visual + CSS/Svelte motion unless you expand scope in-phase.
+- **Full JSON authoring redesign** — still deferred; styling may improve forms and lists only.
 
 ## Context
 
 - **Brownfield:** Codebase map lives under `.planning/codebase/` (architecture, stack, testing, etc.).
-- **Shipped v1.0:** Chain-era `chain_parent_id` / `chain_order` is superseded by logical units with `steps[]` for bundled content and new imports.
-- **Next:** Planning starts clean — new `REQUIREMENTS.md` and roadmap when you run `/gsd-new-milestone`.
+- **Shipped v1.0:** Logical units with `steps[]`; run flow must stay engine-authoritative (presentation may change freely).
+- **v1.1:** Tailwind v4 in `src/routes/layout.css`; prefer **design tokens + shared UI primitives** over one-off per-route CSS.
+- **Research:** Skipped for this milestone — product direction was specified inline (quiz-show / game UI).
 
 ## Constraints
 
-- **Tech stack:** Stay on current **SvelteKit + Dexie + TypeScript** patterns; keep **SessionEngine** and ports testable.
-- **Data:** Further schema changes should stay deliberate; v1 accepted a wipe on upgrade.
-- **Compatibility:** New work should preserve the logical-question import contract unless a milestone explicitly revises it.
+- **Tech stack:** Stay on **SvelteKit + Tailwind + TypeScript**; avoid heavy new runtime deps unless justified in phase plans.
+- **SessionEngine:** Run screen must remain a **presentation layer** over engine state (no new parallel step authority).
+- **Accessibility:** WCAG-minded contrast for text on saturated backgrounds; honor **reduced motion**.
 
 ## Key Decisions
 
@@ -68,6 +82,7 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 | Mixed step results → `partial` | Clear signal when some but not all steps are right | ✓ Shipped v1.0 |
 | Migrate bundled sets; wipe Dexie OK | Ship clean schema; avoid heavy client migration | ✓ Shipped v1.0 |
 | Maximum flexibility in authoring shape | Different question kinds need different step layouts (e.g. code + highlights) | ✓ Shipped v1.0 |
+| v1.1 = quiz-show visual layer | User goal: energetic UI without changing core quiz semantics | — In progress |
 
 ## Evolution
 
@@ -78,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 **After each milestone** (via `/gsd-complete-milestone`): full review, validated vs active refresh, context and next goals.
 
 ---
-*Last updated: 2026-04-12 after v1.0 milestone archive*
+*Last updated: 2026-04-12 — v1.1 Quiz show UI milestone started*
