@@ -15,28 +15,34 @@ Deliver a **shared visual system** for upcoming funnel and run restyles: **theme
 
 ### Color & stage atmosphere
 - **D-01:** **Dark “stage”** base (deep background) with **elevated surfaces** (cards/panels) for structured content.
-- **D-02:** **Light text on the stage** where appropriate; **saturated accent colors** for quiz-show energy.
-- **D-03:** **Body copy and long-form text** live primarily on **elevated surfaces** so contrast stays **WCAG-minded** (avoid low-contrast text directly on saturated accent fields).
+- **D-02:** **Light text on the stage** (chrome, labels outside cards) where appropriate; **saturated accent colors** for quiz-show energy.
+- **D-03:** **Question / content cards:** **white (or near-white) surface** with **dark text** for primary reading — high legibility on the card interior.
+- **D-13:** **Animated CSS stage background** — e.g. a **sliding grid** or similar looping motion on the dark stage (pure CSS preferred). When **`prefers-reduced-motion: reduce`**, use a **static or minimally animated** fallback (no busy grid motion).
 
 ### Typography
 - **D-04:** **One webfont** for **display and title** roles; **system UI stack** for **body** and **label**.
 - **D-05:** Display/title personality: **rounded, friendly, classroom-safe** — approachable quiz energy, still readable at large sizes.
 - **D-06:** Exact font family/files and loading strategy: **Claude’s discretion** within the above personality; must be documented in the token/application docs.
+- **D-14:** **Global scale:** set **`html { font-size: 112.5%; }`** (18px root from default 16px) so **Tailwind `rem`-based spacing and type utilities** scale up **uniformly**; document in token docs and sanity-check small viewports / overflow.
 
 ### Button system (CMP-01)
 - **D-07:** **Pill-shaped primary** CTAs; **secondary and tertiary** controls **more rectangular** (clear visual hierarchy vs primary).
 - **D-08:** Include **destructive** variant where needed for shared primitives.
 - **D-09:** **Minimum ~44px touch targets** (or equivalent documented minimum) for primary actions — **documented in theme/token docs** alongside utility usage.
+- **D-15 (run / step layout):** **Answer actions live outside** the question card (not inside the white card). **Each answer option uses a distinct color** (multicolor answers) so choices read as separate “buzzers.” **When a step has no answer buttons**, layout is **card-centered** as the focal element (no empty button rail).
 
 ### Panels & surfaces
-- **D-10:** **Floating card / panel** primitive: **noticeable radius + shadow**, clear separation from the stage background (depth over flat banding).
+- **D-10:** **Floating card / panel** primitive: **noticeable radius + shadow**, clear separation from the stage background (depth over flat banding). Default **question card** treatment per **D-03** (white surface, dark type inside).
 
 ### Pilot & proof
 - **D-11:** Prove button + panel + tokens on a **dedicated route** (style / design preview), **outside the main teacher funnel** — easy to iterate without blocking real flows.
 - **D-12:** Exact route path and nav discoverability: **Claude’s discretion** (may be dev-only or lightly linked; must be stated in docs).
 
+### Pointer & chrome
+- **D-16:** **Large custom cursor** on quiz-show **in-scope** surfaces where it fits the aesthetic; **must not break usability** — omit or fall back to default on **`pointer: coarse`** (touch) and preserve **visible focus** styles for keyboard users. Cursor graphic and hotspot: **Claude’s discretion**.
+
 ### Claude's Discretion
-- Specific **token names**, **palette values**, **shadow/radius scales**, **secondary/tertiary** exact styles, **webfont choice** (within rounded-friendly brief), **style-lab route path**, and **motion** (reserved for Phase 10; only document hooks if needed).
+- Specific **token names**, **palette values** (including **per-answer accent colors**), **shadow/radius scales**, **secondary/tertiary** exact styles, **webfont choice** (within rounded-friendly brief), **style-lab route path**, **sliding-grid** implementation details, **cursor** asset, and **non-stage** motion (Phase 10 micro-interactions — stage background animation covered by **D-13**).
 
 </decisions>
 
@@ -78,6 +84,10 @@ Deliver a **shared visual system** for upcoming funnel and run restyles: **theme
 
 - **Dark stage + floating cards** for game-show depth without sacrificing readable body text on surfaces.
 - **Rounded friendly** display type + **pill primaries** for approachable, tactile CTAs.
+- **Animated CSS stage** — e.g. **sliding grid** behind content; calm down for **reduced motion**.
+- **White question card, dark type inside**; **colorful answer pills outside** the card (or **centered card only** when no choices).
+- **Root `font-size: 112.5%`** for a globally **bigger** UI via Tailwind rem tokens.
+- **Oversized custom cursor** on pointer devices for extra “show” feel.
 
 </specifics>
 

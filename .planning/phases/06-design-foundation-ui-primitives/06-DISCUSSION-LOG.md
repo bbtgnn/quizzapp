@@ -95,3 +95,9 @@ User selected **all** proposed areas: color, typography, buttons, panels.
 ## Deferred Ideas
 
 None recorded.
+
+---
+
+## Amendments (post-discussion)
+
+**2026-04-12** — User additions merged into `06-CONTEXT.md` (not re-interactive): animated CSS stage background (e.g. sliding grid) with reduced-motion fallback; white question cards + dark in-card text; answer buttons outside card with distinct colors per option, centered card when no buttons; `html { font-size: 112.5%; }` for uniform Tailwind rem scale; large custom cursor with touch/focus safeguards.

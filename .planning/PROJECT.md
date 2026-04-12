@@ -70,6 +70,7 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 - **Brownfield:** Codebase map lives under `.planning/codebase/` (architecture, stack, testing, etc.).
 - **Shipped v1.0:** Logical units with `steps[]`; run flow must stay engine-authoritative (presentation may change freely).
 - **v1.1:** Tailwind v4 in `src/routes/layout.css`; prefer **design tokens + shared UI primitives** over one-off per-route CSS.
+- **v1.1 visual direction (detail):** Dark **animated** stage (e.g. CSS sliding grid, reduced-motion safe); **white question cards** with **dark text**; **multicolor answer controls outside** the card (centered card when no choices); **`html { font-size: 112.5%; }`** for global scale; optional **large custom cursor** on pointer devices. See `.planning/phases/06-design-foundation-ui-primitives/06-CONTEXT.md`.
 - **Research:** Skipped for this milestone — product direction was specified inline (quiz-show / game UI).
 
 ## Constraints
