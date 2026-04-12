@@ -329,17 +329,13 @@ describe('Button.svelte', () => {
 | A2 | **WCAG-style contrast** checking is done manually or in a later automated pass | Pitfalls | Palette may need adjustment for answer slots |
 | A3 | **`prefers-reduced-motion`** is sufficient for **D-13/D-18** without `data-` attributes | Common Pitfalls | May need extra hooks for future per-user toggles |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact webfont files vs Google Fonts link?**
-   - What we know: **D-06** is executor discretion; must document.
-   - What's unclear: Self-host under `static/` vs CDN.
-   - Recommendation: Prefer **self-hosted `woff2` + `font-display: swap`** in `layout.css` for static hosting predictability [ASSUMED: performance best practice; confirm with product constraints].
+Planning locked the following outcomes (see `06-01-PLAN.md` task **06-01-02** and RESEARCH § Environment):
 
-2. **Should Tailwind be bumped from 4.1.x to 4.2.x during this phase?**
-   - What we know: Registry shows **4.2.2** [VERIFIED: npm registry].
-   - What's unclear: Changelog impact on `@theme` / Vite plugin.
-   - Recommendation: **Stay on lockfile** unless a security or bugfix forces bump; treat bump as separate chore with **`bun run check` + full test run**.
+1. **Exact webfont files vs Google Fonts link?** **RESOLVED:** Prefer **self-hosted** `static/fonts/nunito-latin-400.woff2` and `nunito-latin-600.woff2` with `@font-face` and `font-display: swap`; if self-hosting is infeasible in one commit, a **single** Google Fonts `@import` for Nunito 400+600 only is acceptable with the tradeoff noted in `docs/design-tokens.md` (**D-06**).
+
+2. **Should Tailwind be bumped from 4.1.x to 4.2.x during this phase?** **RESOLVED:** **No** — stay on **lockfile `^4.1.18`** for Phase 6; any bump is a **separate chore** after `bun run check` + full tests.
 
 ## Environment Availability
 
