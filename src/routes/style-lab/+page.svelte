@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Panel from '$lib/components/Panel.svelte';
 
@@ -7,13 +8,29 @@
 
 	let selectedPreview = $state<Preview>(null);
 	let answerLayout = $state<AnswerLayout>('withAnswers');
+	let celebrate = $state(false);
+	let wrongShake = $state(false);
+	let confettiKey = $state(0);
+
+	async function simulateCorrect() {
+		wrongShake = false;
+		confettiKey += 1;
+		celebrate = true;
+	}
+
+	async function simulateWrong() {
+		celebrate = false;
+		wrongShake = false;
+		await tick();
+		wrongShake = true;
+	}
 </script>
 
 <svelte:head>
 	<title>Style lab — Quiz show UI</title>
 </svelte:head>
 
-<div class="stage-quiz-show min-h-screen">
+<div class="style-lab-cursor-zone stage-quiz-show min-h-screen">
 	<div class="mx-auto flex max-w-5xl flex-col gap-xl p-lg">
 		<h1 class="text-role-display text-stage-foreground">Quiz show style lab</h1>
 
@@ -30,8 +47,20 @@
 
 		<section
 			aria-label="Design preview canvas"
-			class="relative flex min-h-[20rem] flex-col rounded-[var(--radius-panel)] border border-white/10 bg-black/20 p-lg"
+			class="relative flex min-h-[20rem] flex-col overflow-hidden rounded-[var(--radius-panel)] border border-white/10 bg-black/20 p-lg"
 		>
+			{#if selectedPreview === 'card' && celebrate}
+				{#key confettiKey}
+					<div class="confetti-layer" aria-hidden="true">
+						{#each Array.from({ length: 16 }, (_, i) => i) as i}
+							<span
+								class="confetti-bit palette-{i % 4}"
+								style="left: {8 + (i % 5) * 18}%; --delay: {i * 35}ms"
+							></span>
+						{/each}
+					</div>
+				{/key}
+			{/if}
 			{#if selectedPreview === null}
 				<div class="m-auto max-w-md text-center">
 					<h2 class="text-role-title text-stage-foreground">No sample selected</h2>
@@ -43,16 +72,20 @@
 				<div class="flex flex-wrap gap-sm">
 					<Button variant="secondary" onclick={() => (answerLayout = 'withAnswers')}>Show answer row</Button>
 					<Button variant="tertiary" onclick={() => (answerLayout = 'cardOnly')}>Card only (no choices)</Button>
+					<Button variant="secondary" onclick={simulateCorrect}>Simulate correct</Button>
+					<Button variant="secondary" onclick={simulateWrong}>Simulate wrong</Button>
 				</div>
 				<div class="mt-xl flex flex-1 flex-col gap-xl">
 					{#if answerLayout === 'withAnswers'}
 						<div class="flex w-full max-w-2xl flex-col gap-lg">
-							<Panel variant="question">
-								<h2 class="text-role-title">Sample question card</h2>
-								<p class="text-role-body mt-sm">
-									This panel uses the question variant: white surface and dark type inside the card.
-								</p>
-							</Panel>
+							<div class="question-panel-shell" class:animate-shake-wrong={wrongShake}>
+								<Panel variant="question">
+									<h2 class="text-role-title">Sample question card</h2>
+									<p class="text-role-body mt-sm">
+										This panel uses the question variant: white surface and dark type inside the card.
+									</p>
+								</Panel>
+							</div>
 							<div class="flex flex-wrap justify-center gap-sm">
 								<Button
 									variant="primary"
@@ -128,3 +161,95 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	/* D-16: custom cursor only for fine pointers; coarse keeps system cursor */
+	@media (pointer: fine) {
+		.style-lab-cursor-zone {
+			cursor:
+				url('/cursors/quiz-show-cursor.svg') 16 16,
+				auto;
+		}
+	}
+
+	/* D-17/D-18: CSS-only feedback; disabled under prefers-reduced-motion */
+	.confetti-layer {
+		pointer-events: none;
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+	}
+
+	.confetti-bit {
+		position: absolute;
+		top: 55%;
+		width: 0.45rem;
+		height: 0.65rem;
+		border-radius: 1px;
+		opacity: 0;
+		animation: style-lab-confetti-burst 0.85s ease-out forwards;
+		animation-delay: var(--delay, 0ms);
+	}
+
+	.confetti-bit.palette-0 {
+		background: var(--color-primary);
+	}
+	.confetti-bit.palette-1 {
+		background: var(--color-answer-a);
+	}
+	.confetti-bit.palette-2 {
+		background: var(--color-answer-c);
+	}
+	.confetti-bit.palette-3 {
+		background: var(--color-destructive);
+	}
+
+	@keyframes style-lab-confetti-burst {
+		0% {
+			transform: translate3d(0, 0, 0) rotate(0deg);
+			opacity: 1;
+		}
+		100% {
+			transform: translate3d(0, -8rem, 0) rotate(220deg);
+			opacity: 0;
+		}
+	}
+
+	.question-panel-shell.animate-shake-wrong {
+		animation: style-lab-shake-wrong 0.45s ease-in-out;
+	}
+
+	@keyframes style-lab-shake-wrong {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		20% {
+			transform: translateX(-8px);
+		}
+		40% {
+			transform: translateX(8px);
+		}
+		60% {
+			transform: translateX(-5px);
+		}
+		80% {
+			transform: translateX(5px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.confetti-layer {
+			display: none;
+		}
+
+		.confetti-bit {
+			animation: none;
+		}
+
+		.question-panel-shell.animate-shake-wrong {
+			animation: none;
+			box-shadow: 0 0 0 2px var(--color-destructive);
+		}
+	}
+</style>
