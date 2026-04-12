@@ -80,6 +80,16 @@ export interface Session {
 	completed_at: number | null; // Unix timestamp (ms) or null
 	status: 'active' | 'paused' | 'completed';
 	strategy_id: string;
+	/**
+	 * Turn order for students enrolled in this session, fixed when the run plan is first computed.
+	 * Omitted/null until the first SessionEngine init on the run page.
+	 */
+	student_order_ids?: string[] | null;
+	/**
+	 * Pre-assigned root question id per slot per student (session-local), fixed at plan time.
+	 * Omitted/null until the first SessionEngine init on the run page.
+	 */
+	question_schedule?: Record<string, string[]> | null;
 	/** Whose turn it is; persisted so refresh does not reshuffle the play order. */
 	active_student_id?: string | null;
 	active_unit_progress: {

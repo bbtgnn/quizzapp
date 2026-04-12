@@ -21,6 +21,10 @@ export const load = async ({ params }) => {
 			attemptRepository.listAttemptsBySession(sessionId)
 		]);
 
+		const planningAttempts = (
+			await Promise.all(students.map((s) => attemptRepository.listAttemptsByStudent(s.id)))
+		).flat();
+
 		const allQuestions: Question[] = [];
 		for (const qsId of session.question_set_ids) {
 			const qs = await questionSetRepository.listQuestionsByQuestionSet(qsId);
@@ -28,7 +32,7 @@ export const load = async ({ params }) => {
 		}
 
 		// Keep loader payload shape stable for SessionEngine resume (active_unit_progress stays on session).
-		return { session, sessionStudents, students, allQuestions, attempts };
+		return { session, sessionStudents, students, allQuestions, attempts, planningAttempts };
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e && (e as { status: number }).status === 404) {
 			throw e;

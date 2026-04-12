@@ -33,7 +33,8 @@ const makeSession = (
 	status: Session['status'] = 'active',
 	nQuestions = 1,
 	activeUnitProgress: Session['active_unit_progress'] = null,
-	activeStudentId: Session['active_student_id'] = undefined
+	activeStudentId: Session['active_student_id'] = undefined,
+	plan?: Partial<Pick<Session, 'student_order_ids' | 'question_schedule'>>
 ): Session => ({
 	id: 'sess1',
 	classroom_id: 'c1',
@@ -44,7 +45,9 @@ const makeSession = (
 	status,
 	strategy_id: 'default',
 	active_student_id: activeStudentId,
-	active_unit_progress: activeUnitProgress
+	active_unit_progress: activeUnitProgress,
+	student_order_ids: plan?.student_order_ids ?? null,
+	question_schedule: plan?.question_schedule ?? null
 });
 
 function makeMockRepos() {
@@ -109,6 +112,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 			[makeStudent('s1')],
 			[legacyQuestion],
 			[],
+			[],
 			repos
 		);
 
@@ -126,7 +130,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		const questions = [makeQuestion('q-multi', 3)];
 		const sessionStudents = [makeSessionStudent('s1', 1)];
 		const repos = makeMockRepos();
-		const engine = new SessionEngine(makeSession('active', 1), sessionStudents, students, questions, [], repos);
+		const engine = new SessionEngine(makeSession('active', 1), sessionStudents, students, questions, [], [], repos);
 
 		expect(engine.currentQuestion?.id).toBe('q-multi');
 		expect(engine.currentStepIndex).toBe(0);
@@ -156,6 +160,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeStudent('s1')],
 				[makeQuestion('q1', 2)],
 				[],
+				[],
 				repos
 			);
 
@@ -174,6 +179,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeStudent('s1')],
 				[makeQuestion('q1', 2)],
 				[],
+				[],
 				repos
 			);
 
@@ -191,6 +197,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeSessionStudent('s1', 1)],
 				[makeStudent('s1')],
 				[makeQuestion('q1', 3)],
+				[],
 				[],
 				repos
 			);
@@ -211,6 +218,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeStudent('s1')],
 				[makeQuestion('q-single-agg', 1)],
 				[],
+				[],
 				reposCorrect
 			);
 			await engineCorrect.recordOutcome('correct');
@@ -223,6 +231,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeSessionStudent('s1', 1)],
 				[makeStudent('s1')],
 				[makeQuestion('q-single-agg', 1)],
+				[],
 				[],
 				reposWrong
 			);
@@ -240,6 +249,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeSessionStudent('s1', 1)],
 				[makeStudent('s1')],
 				[makeQuestion('q-progression', 3)],
+				[],
 				[],
 				repos
 			);
@@ -272,6 +282,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 				[makeStudent('s1')],
 				[makeQuestion('q-resume', 3)],
 				[],
+				[],
 				repos
 			);
 
@@ -293,6 +304,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 			students,
 			[makeQuestion('q1', 1), makeQuestion('q2', 1)],
 			[],
+			[],
 			repos
 		);
 
@@ -302,10 +314,14 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 	it('skip mid-unit creates no Attempt and skipped unit is not reinserted in same session', async () => {
 		const repos = makeMockRepos();
 		const engine = new SessionEngine(
-			makeSession('active', 2),
+			makeSession('active', 2, null, undefined, {
+				student_order_ids: ['s1'],
+				question_schedule: { s1: ['q-skip', 'q-next'] }
+			}),
 			[makeSessionStudent('s1', 2)],
 			[makeStudent('s1')],
 			[makeQuestion('q-skip', 2), makeQuestion('q-next', 1)],
+			[],
 			[],
 			repos
 		);
@@ -324,7 +340,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		const students = [makeStudent('s1')];
 		const questions = [makeQuestion('q-only', 1)];
 		const sessionStudents = [makeSessionStudent('s1', 2)];
-		const engine = new SessionEngine(makeSession('active', 2), sessionStudents, students, questions, [], repos);
+		const engine = new SessionEngine(makeSession('active', 2), sessionStudents, students, questions, [], [], repos);
 
 		await engine.recordOutcome('correct');
 		expect(engine.isComplete).toBe(false);
@@ -337,7 +353,7 @@ describe('SessionEngine logical-unit progression and scoring', () => {
 		const students = [makeStudent('s1'), makeStudent('s2')];
 		const questions = [makeQuestion('q1', 1), makeQuestion('q2', 1)];
 		const sessionStudents = [makeSessionStudent('s1', 1), makeSessionStudent('s2', 1)];
-		const engine = new SessionEngine(makeSession('active', 1), sessionStudents, students, questions, [], repos);
+		const engine = new SessionEngine(makeSession('active', 1), sessionStudents, students, questions, [], [], repos);
 
 		await engine.recordOutcome('correct');
 		expect(engine.isComplete).toBe(false);
@@ -378,6 +394,7 @@ describe('run UI data contract', () => {
 			[makeStudent('s1')],
 			[mixedQuestion],
 			[],
+			[],
 			repos
 		);
 
@@ -399,6 +416,7 @@ describe('run UI data contract', () => {
 			[makeSessionStudent('s1', 1)],
 			[makeStudent('s1')],
 			[makeQuestion('q-single', 1)],
+			[],
 			[],
 			repos
 		);

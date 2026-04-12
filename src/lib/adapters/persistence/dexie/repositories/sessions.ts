@@ -10,6 +10,8 @@ export async function createSession(
 		completed_at: null,
 		status: 'active',
 		active_unit_progress: null,
+		student_order_ids: null,
+		question_schedule: null,
 		...data
 	};
 	await db.sessions.add(session);

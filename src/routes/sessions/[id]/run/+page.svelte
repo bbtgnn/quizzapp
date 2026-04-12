@@ -34,6 +34,7 @@
 			data.students,
 			data.allQuestions,
 			data.attempts,
+			data.planningAttempts,
 			sessionEnginePersistence
 		);
 		tick = 0;
