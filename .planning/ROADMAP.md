@@ -41,7 +41,7 @@
 Plans:
 
 - [x] 06-01-PLAN.md — TOK-01: `@theme` tokens, typography `@utility` roles, `html` 112.5%, CSS stage motion + reduced-motion fallback in `layout.css`
-- [ ] 06-02-PLAN.md — CMP-01: `Button.svelte` + `Panel.svelte` + Vitest browser specs
+- [x] 06-02-PLAN.md — CMP-01: `Button.svelte` + `Panel.svelte` + Vitest browser specs
 - [ ] 06-03-PLAN.md — `/style-lab` pilot (tokens + primitives + D-16/D-17 demos) + `docs/design-tokens.md`
 
 ### Phase 7: Funnel shell & classroom selection
