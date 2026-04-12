@@ -1,169 +1,372 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Panel from '$lib/components/Panel.svelte';
+	import { animate, createTimeline } from '$lib/motion/anime';
+	import { Confetti } from 'svelte-confetti';
 
-	type Preview = 'buttons' | 'card' | 'typography' | null;
-	type AnswerLayout = 'withAnswers' | 'cardOnly';
+	/**
+	 * Pixel-faithful shell of `sessions/[id]/run/+page.svelte` (active question view)
+	 * with mock data and a floating answer-type switcher for design preview.
+	 */
+	type AnswerType = 'open' | 'multiple-choice' | 'true-false';
 
-	let selectedPreview = $state<Preview>(null);
-	let answerLayout = $state<AnswerLayout>('withAnswers');
+	/** Matches quiz-show tokens in layout.css (primary, answer-a/c, destructive). */
+	const confettiColors = ['#e11d48', '#2563eb', '#ca8a04', '#dc2626'] as const;
+
+	let answerType = $state<AnswerType>('multiple-choice');
+
+	const currentStudent = { name: 'Jordan Lee' };
+	const progress = {
+		studentsCompleted: 0,
+		studentsTotal: 4,
+		slotsCompletedForCurrentStudent: 1,
+		slotsTotalForCurrentStudent: 5
+	};
+	const currentStepIndex = 0;
+	const totalSteps = 3;
+
+	const questionText =
+		'What does the following expression evaluate to in JavaScript when both operands are used as shown?';
+
+	const mcOptions = [
+		'`"2" + 2` → `"22"` (string concatenation)',
+		'`"2" + 2` → `4` (numeric addition)',
+		'It throws a TypeError',
+		'It returns `undefined`'
+	];
+
+	/** A–D: red, yellow, green, blue (style lab preview). */
+	const mcPillClasses = [
+		'bg-red-600 text-white hover:bg-red-500',
+		'bg-yellow-400 text-gray-900 hover:bg-yellow-300',
+		'bg-green-600 text-white hover:bg-green-500',
+		'bg-blue-600 text-white hover:bg-blue-500'
+	] as const;
+
 	let celebrate = $state(false);
-	let wrongShake = $state(false);
+	let wrongAnimKey = $state(0);
 	let confettiKey = $state(0);
 
-	async function simulateCorrect() {
-		wrongShake = false;
+	let cardFloatEl = $state<HTMLDivElement | null>(null);
+	let answersFloatEl = $state<HTMLDivElement | null>(null);
+	let questionShellEl = $state<HTMLDivElement | null>(null);
+
+	function prefersReducedMotion(): boolean {
+		return (
+			typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+		);
+	}
+
+	/** Gentle vertical drift on the question card (anime loop). */
+	$effect(() => {
+		const el = cardFloatEl;
+		if (typeof window === 'undefined' || !el || prefersReducedMotion()) return;
+
+		const anim = animate(el, {
+			y: { from: 0, to: -5 },
+			duration: 5000,
+			loop: true,
+			alternate: true,
+			ease: 'inOutSine'
+		});
+
+		return () => {
+			anim.revert();
+		};
+	});
+
+	/** Gentle vertical drift on the answer block (slightly different cadence). */
+	$effect(() => {
+		const el = answersFloatEl;
+		if (typeof window === 'undefined' || !el || prefersReducedMotion()) return;
+
+		const anim = animate(el, {
+			y: { from: 0, to: -6 },
+			duration: 5500,
+			loop: true,
+			alternate: true,
+			ease: 'inOutSine'
+		});
+
+		return () => {
+			anim.revert();
+		};
+	});
+
+	/** Horizontal shake on “Wrong” (timeline, remount-safe via revert cleanup). */
+	$effect(() => {
+		const k = wrongAnimKey;
+		const shell = questionShellEl;
+		if (typeof window === 'undefined' || k === 0 || !shell) return;
+
+		if (prefersReducedMotion()) {
+			shell.style.setProperty('box-shadow', '0 0 0 2px var(--color-destructive)');
+			const id = window.setTimeout(() => shell.style.removeProperty('box-shadow'), 650);
+			return () => {
+				window.clearTimeout(id);
+				shell.style.removeProperty('box-shadow');
+			};
+		}
+
+		const tl = createTimeline();
+		tl.add(shell, { x: -8, duration: 90, ease: 'inOutQuad' });
+		tl.add(shell, { x: 8, duration: 90, ease: 'inOutQuad' }, '<');
+		tl.add(shell, { x: -5, duration: 75, ease: 'inOutQuad' }, '<');
+		tl.add(shell, { x: 5, duration: 75, ease: 'inOutQuad' }, '<');
+		tl.add(shell, { x: 0, duration: 120, ease: 'outSine' }, '<');
+
+		return () => {
+			tl.revert();
+		};
+	});
+
+	function setAnswerType(next: AnswerType) {
+		answerType = next;
+	}
+
+	function simulateCorrect() {
 		confettiKey += 1;
 		celebrate = true;
 	}
 
-	async function simulateWrong() {
+	function simulateWrong() {
 		celebrate = false;
-		wrongShake = false;
-		await tick();
-		wrongShake = true;
+		wrongAnimKey += 1;
 	}
 </script>
 
 <svelte:head>
-	<title>Style lab — Quiz show UI</title>
+	<title>Style lab — Session run preview</title>
 </svelte:head>
 
-<div class="style-lab-cursor-zone stage-quiz-show min-h-screen">
-	<div class="mx-auto flex max-w-5xl flex-col gap-xl p-lg">
-		<h1 class="text-role-display text-stage-foreground">Quiz show style lab</h1>
+<!-- Single full-viewport shell matching session run layout (`bg-gray-900`, `p-8` column) -->
+<div
+	class="style-lab-cursor-zone style-lab-quiz-stage relative flex h-screen w-screen flex-col overflow-auto bg-gray-900 text-gray-100"
+>
+	{#if celebrate}
+		{#key confettiKey}
+			<div class="style-lab-confetti-mount" aria-hidden="true">
+				<Confetti
+					amount={56}
+					size={11}
+					duration={2400}
+					x={[-0.85, 0.85]}
+					y={[0.35, 1]}
+					xSpread={0.32}
+					fallDistance="85vh"
+					cone={true}
+					rounded={true}
+					colorArray={[...confettiColors]}
+					disableForReducedMotion={true}
+				/>
+			</div>
+		{/key}
+	{/if}
 
-		<div class="flex flex-wrap gap-sm">
-			<Button variant="primary" onclick={() => (selectedPreview = 'card')}>Open design preview</Button>
-		</div>
-
-		<div class="text-role-label text-stage-foreground uppercase tracking-wide">Primitive picker</div>
-		<div class="flex flex-wrap gap-sm">
-			<Button variant="secondary" onclick={() => (selectedPreview = 'buttons')}>Buttons sample</Button>
-			<Button variant="secondary" onclick={() => (selectedPreview = 'card')}>Card &amp; answers</Button>
-			<Button variant="secondary" onclick={() => (selectedPreview = 'typography')}>Typography</Button>
-		</div>
-
-		<section
-			aria-label="Design preview canvas"
-			class="relative flex min-h-[20rem] flex-col overflow-hidden rounded-[var(--radius-panel)] border border-white/10 bg-black/20 p-lg"
-		>
-			{#if selectedPreview === 'card' && celebrate}
-				{#key confettiKey}
-					<div class="confetti-layer" aria-hidden="true">
-						{#each Array.from({ length: 16 }, (_, i) => i) as i}
-							<span
-								class="confetti-bit palette-{i % 4}"
-								style="left: {8 + (i % 5) * 18}%; --delay: {i * 35}ms"
-							></span>
-						{/each}
-					</div>
-				{/key}
-			{/if}
-			{#if selectedPreview === null}
-				<div class="m-auto max-w-md text-center">
-					<h2 class="text-role-title text-stage-foreground">No sample selected</h2>
-					<p class="text-role-body mt-md text-stage-foreground/90">
-						Pick a primitive in the list to preview tokens and states.
+	<div
+		class="relative z-[1] mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8"
+	>
+		<header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+			<div
+				class="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2 [font-family:var(--font-display)]"
+			>
+				<div class="min-w-0">
+					<p
+						class="[font-family:var(--font-display)] text-sm font-semibold tracking-wide text-gray-500 uppercase"
+					>
+						Current student
+					</p>
+					<h1 class="text-2xl leading-tight font-semibold text-white sm:text-3xl">
+						{currentStudent.name}
+					</h1>
+				</div>
+				<div class="min-w-0 text-sm leading-snug font-semibold text-gray-400">
+					<p>
+						Student {progress.studentsCompleted + 1} of {progress.studentsTotal} &middot; Question {progress.slotsCompletedForCurrentStudent +
+							1} of {progress.slotsTotalForCurrentStudent}
+						{#if totalSteps > 0}
+							&middot; Step {currentStepIndex + 1} of {totalSteps}
+						{/if}
 					</p>
 				</div>
-			{:else if selectedPreview === 'card'}
-				<div class="flex flex-wrap gap-sm">
-					<Button variant="secondary" onclick={() => (answerLayout = 'withAnswers')}>Show answer row</Button>
-					<Button variant="tertiary" onclick={() => (answerLayout = 'cardOnly')}>Card only (no choices)</Button>
-					<Button variant="secondary" onclick={simulateCorrect}>Simulate correct</Button>
-					<Button variant="secondary" onclick={simulateWrong}>Simulate wrong</Button>
+			</div>
+			<div class="flex shrink-0 items-center gap-3">
+				<button
+					type="button"
+					class="rounded-lg border border-amber-500 px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold text-amber-300 transition-colors hover:bg-amber-500/10"
+				>
+					Skip Unit
+				</button>
+				<button
+					type="button"
+					class="rounded-lg border border-gray-600 px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
+				>
+					Pause Session
+				</button>
+			</div>
+		</header>
+
+		<div class="flex min-h-0 flex-1 flex-col items-center justify-center pb-20">
+			<div class="flex w-full flex-col items-center gap-3">
+				<div class="style-lab-float-card w-full" bind:this={cardFloatEl}>
+					<div class="question-panel-shell" bind:this={questionShellEl}>
+						<div
+							class="rounded-xl bg-card p-6 text-center text-card-foreground shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/5"
+						>
+							<h2 class="text-role-title text-balance text-card-foreground">{questionText}</h2>
+						</div>
+					</div>
 				</div>
-				<div class="mt-xl flex flex-1 flex-col gap-xl">
-					{#if answerLayout === 'withAnswers'}
-						<div class="flex w-full max-w-2xl flex-col gap-lg">
-							<div class="question-panel-shell" class:animate-shake-wrong={wrongShake}>
-								<Panel variant="question">
-									<h2 class="text-role-title">Sample question card</h2>
-									<p class="text-role-body mt-sm">
-										This panel uses the question variant: white surface and dark type inside the card.
-									</p>
-								</Panel>
-							</div>
-							<div class="flex flex-wrap justify-center gap-sm">
-								<Button
-									variant="primary"
-									class="min-h-[44px] rounded-[var(--radius-control)] bg-answer-a text-white hover:bg-answer-a/90"
-									>A</Button
-								>
-								<Button
-									variant="primary"
-									class="min-h-[44px] rounded-[var(--radius-control)] bg-answer-b text-white hover:bg-answer-b/90"
-									>B</Button
-								>
-								<Button
-									variant="primary"
-									class="min-h-[44px] rounded-[var(--radius-control)] bg-answer-c text-white hover:bg-answer-c/90"
-									>C</Button
-								>
-								<Button
-									variant="primary"
-									class="min-h-[44px] rounded-[var(--radius-control)] bg-answer-d text-white hover:bg-answer-d/90"
-									>D</Button
-								>
+
+				<div class="style-lab-float-answers w-full shrink-0" bind:this={answersFloatEl}>
+					{#if answerType === 'open'}
+						<p class="text-center text-sm text-gray-500">
+							Press <kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">1</kbd> /
+							<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">C</kbd>
+							= Correct &middot;
+							<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">2</kbd> /
+							<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">P</kbd>
+							= Partial &middot;
+							<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">3</kbd> /
+							<kbd class="rounded bg-gray-800 px-2 py-1 font-mono text-gray-300">W</kbd> = Wrong
+						</p>
+					{:else if answerType === 'multiple-choice'}
+						<div class="flex w-full flex-col gap-2">
+							<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
+							<div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+								{#each mcOptions as option, i (i)}
+									<button
+										type="button"
+										class="rounded-full px-5 py-3 text-center [font-family:var(--font-display)] text-base font-semibold shadow-md ring-1 ring-black/10 transition-colors {mcPillClasses[
+											i
+										]}"
+									>
+										{option}
+									</button>
+								{/each}
 							</div>
 						</div>
-					{:else}
-						<div class="flex flex-1 flex-col items-center justify-center">
-							<Panel variant="question" class="max-w-xl">
-								<h2 class="text-role-title">Sample question card</h2>
-								<p class="text-role-body mt-sm">
-									No answer buttons — card-centered layout (D-15).
-								</p>
-							</Panel>
+					{:else if answerType === 'true-false'}
+						<div class="flex w-full flex-col gap-2">
+							<p class="text-center text-sm text-gray-400">Select the correct answer:</p>
+							<div class="flex w-full min-w-0 gap-3">
+								<button
+									type="button"
+									class="flex min-h-[48px] min-w-0 flex-1 items-center justify-center rounded-full bg-green-600 py-3 [font-family:var(--font-display)] text-xl font-semibold text-white shadow-md ring-1 ring-black/10 transition-colors hover:bg-green-500"
+								>
+									True
+								</button>
+								<button
+									type="button"
+									class="flex min-h-[48px] min-w-0 flex-1 items-center justify-center rounded-full bg-red-600 py-3 [font-family:var(--font-display)] text-xl font-semibold text-white shadow-md ring-1 ring-black/10 transition-colors hover:bg-red-500"
+								>
+									False
+								</button>
+							</div>
 						</div>
 					{/if}
 				</div>
-			{:else if selectedPreview === 'buttons'}
-				<div class="grid w-full gap-md sm:grid-cols-2">
-					<div class="flex flex-col gap-sm">
-						<span class="text-role-label text-stage-foreground">Primary</span>
-						<Button variant="primary">Primary</Button>
-					</div>
-					<div class="flex flex-col gap-sm">
-						<span class="text-role-label text-stage-foreground">Secondary</span>
-						<Button variant="secondary">Secondary</Button>
-					</div>
-					<div class="flex flex-col gap-sm">
-						<span class="text-role-label text-stage-foreground">Tertiary</span>
-						<Button variant="tertiary">Tertiary</Button>
-					</div>
-					<div class="flex flex-col gap-sm">
-						<span class="text-role-label text-stage-foreground">Destructive</span>
-						<Button variant="destructive">Destructive</Button>
-					</div>
-				</div>
-			{:else}
-				<div class="flex flex-col gap-lg text-stage-foreground">
-					<p class="text-role-display">Display role</p>
-					<p class="text-role-title">Title role</p>
-					<div class="rounded-[var(--radius-panel)] bg-card p-lg text-card-foreground">
-						<p class="text-role-body">Body role inside a card (system stack).</p>
-					</div>
-					<p class="text-role-label uppercase">Label role</p>
-				</div>
-			{/if}
-		</section>
+			</div>
+		</div>
+	</div>
 
-		<div class="text-role-body text-stage-foreground/90">
-			<p class="text-role-label text-stage-foreground">Error state (copy)</p>
-			<p>Something went wrong loading the preview.</p>
-			<p>Refresh the page or return to the home screen.</p>
-			<p class="text-role-label mt-lg text-stage-foreground">Destructive confirmation (copy)</p>
-			<p>Reset preview</p>
-			<p>Reset local preview state? This only affects the lab page.</p>
+	<!-- Floating preview + feedback (not part of production run UI) -->
+	<div
+		class="pointer-events-none fixed bottom-6 left-1/2 z-50 flex max-w-[min(100%,28rem)] -translate-x-1/2 justify-center px-4"
+		aria-label="Style lab preview controls"
+	>
+		<div
+			class="pointer-events-auto flex w-full flex-col gap-2 rounded-3xl border border-gray-600 bg-gray-950/95 px-3 py-3 shadow-xl backdrop-blur-sm"
+			role="group"
+		>
+			<div class="flex flex-wrap items-center justify-center gap-2">
+				<span class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Layout</span>
+				<button
+					type="button"
+					class="rounded-full px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold transition-colors {answerType ===
+					'open'
+						? 'bg-blue-600 text-white'
+						: 'text-gray-300 hover:bg-gray-800'}"
+					aria-pressed={answerType === 'open'}
+					onclick={() => setAnswerType('open')}
+				>
+					Open
+				</button>
+				<button
+					type="button"
+					class="rounded-full px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold transition-colors {answerType ===
+					'multiple-choice'
+						? 'bg-blue-600 text-white'
+						: 'text-gray-300 hover:bg-gray-800'}"
+					aria-pressed={answerType === 'multiple-choice'}
+					onclick={() => setAnswerType('multiple-choice')}
+				>
+					Multiple choice
+				</button>
+				<button
+					type="button"
+					class="rounded-full px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold transition-colors {answerType ===
+					'true-false'
+						? 'bg-blue-600 text-white'
+						: 'text-gray-300 hover:bg-gray-800'}"
+					aria-pressed={answerType === 'true-false'}
+					onclick={() => setAnswerType('true-false')}
+				>
+					True / false
+				</button>
+			</div>
+			<div class="h-px bg-gray-700/80" aria-hidden="true"></div>
+			<div class="flex flex-wrap items-center justify-center gap-2">
+				<span class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Feedback</span>
+				<button
+					type="button"
+					class="rounded-full bg-emerald-700 px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+					onclick={simulateCorrect}
+				>
+					Confetti
+				</button>
+				<button
+					type="button"
+					class="rounded-full bg-rose-800 px-4 py-2 [font-family:var(--font-display)] text-sm font-semibold text-white transition-colors hover:bg-rose-700"
+					onclick={simulateWrong}
+				>
+					Wrong
+				</button>
+			</div>
 		</div>
 	</div>
 </div>
 
 <style>
-	/* D-16: custom cursor only for fine pointers; coarse keeps system cursor */
+	.style-lab-quiz-stage::before {
+		content: '';
+		position: fixed;
+		inset: -22%;
+		z-index: 0;
+		pointer-events: none;
+		opacity: 0.9;
+		background-image:
+			linear-gradient(rgba(244, 244, 245, 0.055) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(244, 244, 245, 0.055) 1px, transparent 1px);
+		background-size: 34px 34px;
+		transform: rotate(-2.8deg) scale(1.1);
+		animation: style-lab-grid-shift 21s ease-in-out infinite;
+	}
+
+	@keyframes style-lab-grid-shift {
+		0%,
+		100% {
+			background-position: 0 0;
+			transform: rotate(-2.8deg) scale(1.1) translate(0, 0);
+		}
+		35% {
+			background-position: 40px 22px;
+			transform: rotate(-2.8deg) scale(1.1) translate(16px, -12px);
+		}
+		70% {
+			background-position: 78px 44px;
+			transform: rotate(-2.8deg) scale(1.1) translate(-12px, 10px);
+		}
+	}
+
 	@media (pointer: fine) {
 		.style-lab-cursor-zone {
 			cursor:
@@ -172,84 +375,26 @@
 		}
 	}
 
-	/* D-17/D-18: CSS-only feedback; disabled under prefers-reduced-motion */
-	.confetti-layer {
+	/* Float motion is driven by anime.js in script (revert on teardown). */
+
+	/* svelte-confetti: fill viewport; burst originates near upper-middle */
+	.style-lab-confetti-mount {
 		pointer-events: none;
+		position: fixed;
+		inset: 0;
+		z-index: 20;
+	}
+
+	.style-lab-confetti-mount :global(.confetti-holder) {
 		position: absolute;
 		inset: 0;
-		z-index: 2;
-	}
-
-	.confetti-bit {
-		position: absolute;
-		top: 55%;
-		width: 0.45rem;
-		height: 0.65rem;
-		border-radius: 1px;
-		opacity: 0;
-		animation: style-lab-confetti-burst 0.85s ease-out forwards;
-		animation-delay: var(--delay, 0ms);
-	}
-
-	.confetti-bit.palette-0 {
-		background: var(--color-primary);
-	}
-	.confetti-bit.palette-1 {
-		background: var(--color-answer-a);
-	}
-	.confetti-bit.palette-2 {
-		background: var(--color-answer-c);
-	}
-	.confetti-bit.palette-3 {
-		background: var(--color-destructive);
-	}
-
-	@keyframes style-lab-confetti-burst {
-		0% {
-			transform: translate3d(0, 0, 0) rotate(0deg);
-			opacity: 1;
-		}
-		100% {
-			transform: translate3d(0, -8rem, 0) rotate(220deg);
-			opacity: 0;
-		}
-	}
-
-	.question-panel-shell.animate-shake-wrong {
-		animation: style-lab-shake-wrong 0.45s ease-in-out;
-	}
-
-	@keyframes style-lab-shake-wrong {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		20% {
-			transform: translateX(-8px);
-		}
-		40% {
-			transform: translateX(8px);
-		}
-		60% {
-			transform: translateX(-5px);
-		}
-		80% {
-			transform: translateX(5px);
-		}
+		pointer-events: none;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.confetti-layer {
-			display: none;
-		}
-
-		.confetti-bit {
+		.style-lab-quiz-stage::before {
 			animation: none;
-		}
-
-		.question-panel-shell.animate-shake-wrong {
-			animation: none;
-			box-shadow: 0 0 0 2px var(--color-destructive);
+			transform: rotate(-2.8deg) scale(1.1);
 		}
 	}
 </style>
