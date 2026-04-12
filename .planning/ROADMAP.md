@@ -3,88 +3,90 @@
 ## Milestones
 
 - ✅ **v1.0 Multi-step questions** — Phases 1–5 — shipped 2026-04-12 — [archived roadmap](milestones/v1.0-ROADMAP.md) · [archived requirements](milestones/v1.0-REQUIREMENTS.md)
-- 🚧 **v1.1 Quiz show UI** — Phases 6–10 — in progress
+- 🚧 **v1.1 Quiz show UI** — Phases 6–10 — in progress (**funnel + run only**)
 
 ## Overview
 
-**v1.1** restyles the entire app toward a **game / quiz show** look: **saturated color**, **large tactile controls**, **expressive type**, and **juicy** motion—with **reduced-motion** support and **no change** to SessionEngine authority on the run screen.
+**v1.1** applies a **game / quiz show** look—**saturated color**, **large controls**, **expressive type**, **juicy motion**—to the **main path**: **classroom selection → question set selection → live run**.
+
+**Teacher management** (new classroom, student lists, import wizard, sessions index, history, settings, etc.) stays **visually simple**; no dedicated quiz-show pass in this milestone.
 
 ## Phases
 
-- [ ] **Phase 6: Design foundation & UI primitives** — Quiz-show **tokens** (TOK-01) and **shared components** (CMP-01): theme wiring in Tailwind, typography scale, primary/secondary buttons, panels/cards.
-- [ ] **Phase 7: App shell & navigation** — **Global layout** (SHL-01): nav, page frame, background treatment, consistent header/footer rhythm.
-- [ ] **Phase 8: Teacher management surfaces** — Restyle **RTE-01** routes: entry, classrooms, students, question sets, sessions, settings (lists, forms, empty states).
-- [ ] **Phase 9: Live session run** — **RUN-01**: run route and participant-facing panels; big answer controls; k-of-n and stem presentation match engine state with quiz-show staging.
-- [ ] **Phase 10: Motion, feedback & polish** — **MOT-01** transitions/micro-interactions + **POL-01**: errors, loading, upgrade banner, responsive pass on saturated layouts.
+- [ ] **Phase 6: Design foundation & UI primitives** — **TOK-01, CMP-01**: Tailwind/theme tokens, typography scale, primary/secondary buttons, panels/cards for reuse on funnel + run.
+- [ ] **Phase 7: Funnel shell & classroom selection** — **SHL-01, FUN-01**: Framing for in-scope routes; quiz-show **`/`** (classroom list / pick teaching context).
+- [ ] **Phase 8: Question set selection** — **FUN-02**: **`/sessions/new`** and **`/question-sets`** list; import route stays baseline.
+- [ ] **Phase 9: Live session run** — **RUN-01**: **`/sessions/[id]/run`** — big staging, oversized answer controls, engine-true k-of-n/stem.
+- [ ] **Phase 10: Motion & polish (in-scope)** — **MOT-01, POL-01**: Transitions/micro-interactions + readable errors/loading/notices and responsive check on funnel + run.
 
 ## Phase Details
 
 ### Phase 6: Design foundation & UI primitives
 
-**Goal**: Establish the **visual system** so later phases compose shared primitives instead of ad-hoc styles.
+**Goal**: Shared **visual system** for funnel and run screens.
 
-**Depends on**: v1.0 complete (functional baseline)
+**Depends on**: v1.0 complete
 
 **Requirements**: TOK-01, CMP-01
 
-**Success criteria** (what must be TRUE):
+**Success criteria**:
 
-1. **Theme tokens** exist for background, surface, primary/secondary/accent, success/warn/danger, and border radii—consumable from Svelte/Tailwind utilities.
-2. **Typography scale** is defined for display / title / body / label roles used across the app.
-3. **At least two button variants** (primary + secondary) and a **panel/card** primitive exist and are used in a **small pilot** refactors (e.g. one page or storybook-style demo route) to prove integration.
-4. **Documentation** in README or `docs/` (short) explains how to apply tokens for new UI.
+1. Theme **tokens** (background, surface, primary/secondary/accent, semantic colors, radii) usable from utilities.
+2. **Typography** roles for display / title / body / label.
+3. **Button** + **panel** primitives proven on a small pilot surface.
+4. Short **docs** on applying tokens.
 
-**Plans:** (to be created via `/gsd-plan-phase 6`)
+**Plans:** `/gsd-plan-phase 6`
 
-### Phase 7: App shell & navigation
+### Phase 7: Funnel shell & classroom selection
 
-**Goal**: The **frame** of the app feels like a quiz show product, not a default starter template.
+**Goal**: **Shell** and **`/`** feel like a quiz show **without** restyling full management.
 
 **Depends on**: Phase 6
 
-**Requirements**: SHL-01
+**Requirements**: SHL-01, FUN-01
 
 **Success criteria**:
 
-1. Root **layout** and shared navigation use the new shell styles (background, nav placement, active states).
-2. No remaining “plain” global chrome in scope routes once phases 7–8 complete (phase 7 delivers shell; phase 8 completes inner pages).
+1. Funnel/run routes use quiz-show **frame** (background, header rhythm) per SHL-01; management pages may stay plain or lightly inherit tokens only.
+2. **`/`** classroom list / selection is fully on-brand (big tiles or list, clear CTA to continue the path).
 
-**Plans:** (TBD)
+**Plans:** TBD
 
-### Phase 8: Teacher management surfaces
+### Phase 8: Question set selection
 
-**Goal**: Every **teacher-facing** management screen matches the new aesthetic end-to-end.
+**Goal**: **Pick sets and start** feels like part of the show.
 
 **Depends on**: Phase 7
 
-**Requirements**: RTE-01
+**Requirements**: FUN-02
 
 **Success criteria**:
 
-1. Home/entry, classrooms, students, question sets (including import flows), sessions (list + setup), and settings use shared primitives and tokenized colors.
-2. **Empty states** and **tables/lists** have intentional quiz-show styling (not default browser gray blocks).
+1. **`/sessions/new`** — classroom dropdown, set multi-select, counts/strategy — uses large controls and funnel styling.
+2. **`/question-sets`** — browse/list aligned with funnel (import page excluded from quiz-show requirements).
 
-**Plans:** (TBD)
+**Plans:** TBD
 
 ### Phase 9: Live session run
 
-**Goal**: **Live run** feels like a **game show** while preserving **SessionEngine** as the only authority for step index and progression.
+**Goal**: **Run** is the climax: game-show energy, **engine-only** progression.
 
-**Depends on**: Phase 8 (shared components available)
+**Depends on**: Phase 8
 
 **Requirements**: RUN-01
 
 **Success criteria**:
 
-1. Stem, current step, and **k-of-n** are **legible at a glance** with oversized controls for answer actions.
-2. **No new source of truth** for step order; UI reads the same engine-derived state as today.
-3. Visual states for correct/partial/wrong/skip (if surfaced) align with the new palette.
+1. Stem, step, **k-of-n** legible at a glance; oversized answer actions.
+2. **No** new step authority; same getters/state as today.
+3. Outcome/skip visuals match the new palette where shown.
 
-**Plans:** (TBD)
+**Plans:** TBD
 
-### Phase 10: Motion, feedback & polish
+### Phase 10: Motion & polish (in-scope)
 
-**Goal**: Add **juice** safely and close visual gaps.
+**Goal**: **Juice** + guardrails on **funnel + run**.
 
 **Depends on**: Phase 9
 
@@ -92,11 +94,11 @@
 
 **Success criteria**:
 
-1. **Motion** is applied to key interactions (route transitions or panel enter, button feedback) with **`prefers-reduced-motion`** respected.
-2. **Errors, loading, and banners** (including IndexedDB upgrade notice) match the theme and remain readable.
-3. **Responsive** check: no critical overlap or unreadable text on narrow viewports.
+1. Motion on key funnel/run interactions; **`prefers-reduced-motion`** honored.
+2. Loading/error paths on in-scope routes readable; upgrade banner at least **contrast-safe**.
+3. Responsive check for funnel + run (no broken saturated layouts on narrow widths).
 
-**Plans:** (TBD)
+**Plans:** TBD
 
 ## Progress
 
@@ -105,7 +107,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 6. Design foundation & UI primitives | v1.1 | 0/TBD | Not started | — |
-| 7. App shell & navigation | v1.1 | 0/TBD | Not started | — |
-| 8. Teacher management surfaces | v1.1 | 0/TBD | Not started | — |
+| 7. Funnel shell & classroom selection | v1.1 | 0/TBD | Not started | — |
+| 8. Question set selection | v1.1 | 0/TBD | Not started | — |
 | 9. Live session run | v1.1 | 0/TBD | Not started | — |
-| 10. Motion, feedback & polish | v1.1 | 0/TBD | Not started | — |
+| 10. Motion & polish (in-scope) | v1.1 | 0/TBD | Not started | — |

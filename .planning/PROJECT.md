@@ -6,19 +6,22 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 
 ## Current Milestone: v1.1 Quiz show UI
 
-**Goal:** Replace the plain default look with a **game / quiz show** visual experience—**bold color**, **large controls**, **expressive typography**, and **juicy** motion and feedback—while keeping v1.0 session semantics intact.
+**Goal:** Replace the plain default look with a **game / quiz show** visual experience—**bold color**, **large controls**, **expressive typography**, and **juicy** motion and feedback—on the **main teaching path only**, while keeping v1.0 session semantics intact.
 
-**Target features:**
+**Target features (in scope):**
 
-- **Quiz-show visual language** — saturated palette, stage-like panels, clear hierarchy, “broadcast” energy.
-- **Oversized, tactile controls** — primary flows easy to hit and read at a glance (classroom + live run).
-- **Motion & feedback** — purposeful transitions and micro-interactions; **respect `prefers-reduced-motion`**.
-- **Full-surface coverage** — all primary teacher routes and the **live run** restyled; empty/error states and shell chrome included.
+- **Quiz-show visual language** — saturated palette, stage-like panels, clear hierarchy, “broadcast” energy on the **funnel**: **classroom selection → question set selection → live run**.
+- **Oversized, tactile controls** — those steps and **live run** are easy to hit and read at a glance.
+- **Motion & feedback** — purposeful transitions and micro-interactions on the funnel + run; **respect `prefers-reduced-motion`**.
+
+**Explicitly not in scope for v1.1:**
+
+- **Teacher management surfaces** stay **simple / current baseline** styling: e.g. **new classroom**, **classroom detail / students**, **question set import**, **sessions list**, **history**, **settings** — no quiz-show pass required unless a quick token alignment is unavoidable.
 
 ## Current state
 
 - **Shipped v1.0** (2026-04-12): multi-step logical questions end-to-end — import contract (Zod), Dexie v3 one-row-per-unit persistence, SessionEngine progression and scoring, run UI bound to engine state, tests and backup/export parity, pause/resume documentation.
-- **In progress v1.1:** UI-only milestone; no change to logical-question schema or SessionEngine contracts unless a style need forces a minimal presentation tweak (avoid behavioral changes).
+- **In progress v1.1:** UI-only milestone, **scoped to the live quiz funnel**; management screens remain visually basic. No change to logical-question schema or SessionEngine contracts unless a style need forces a minimal presentation tweak (avoid behavioral changes).
 
 ## Next milestone goals
 
@@ -52,14 +55,15 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 
 ### Active
 
-- [ ] **v1.1 quiz-show restyle** — see `.planning/REQUIREMENTS.md` (TOK/CMP/SHL/RTE/RUN/MOT/POL).
+- [ ] **v1.1 quiz-show restyle (funnel + run)** — see `.planning/REQUIREMENTS.md` (TOK/CMP/SHL/FUN/RUN/MOT/POL).
 
 ### Out of Scope
 
 - **Server sync, accounts, multi-device continuity** — local-first app remains as today.
 - **New assessment rules or question types** — visual milestone only; no weighted steps or branching unless explicitly added later.
 - **Sound effects / audio** — optional follow-up; v1.1 is visual + CSS/Svelte motion unless you expand scope in-phase.
-- **Full JSON authoring redesign** — still deferred; styling may improve forms and lists only.
+- **Full JSON authoring redesign** — still deferred.
+- **Quiz-show styling for management / admin routes** — deferred; v1.1 focuses on **classroom pick → set pick → live run** only.
 
 ## Context
 
@@ -82,7 +86,7 @@ A **browser-only** quiz application for teachers: **classrooms**, **students**, 
 | Mixed step results → `partial` | Clear signal when some but not all steps are right | ✓ Shipped v1.0 |
 | Migrate bundled sets; wipe Dexie OK | Ship clean schema; avoid heavy client migration | ✓ Shipped v1.0 |
 | Maximum flexibility in authoring shape | Different question kinds need different step layouts (e.g. code + highlights) | ✓ Shipped v1.0 |
-| v1.1 = quiz-show visual layer | User goal: energetic UI without changing core quiz semantics | — In progress |
+| v1.1 = quiz-show on main funnel only | Ship “wow” on path to live run; leave management UI plain | — In progress |
 
 ## Evolution
 
@@ -93,4 +97,4 @@ This document evolves at phase transitions and milestone boundaries.
 **After each milestone** (via `/gsd-complete-milestone`): full review, validated vs active refresh, context and next goals.
 
 ---
-*Last updated: 2026-04-12 — v1.1 Quiz show UI milestone started*
+*Last updated: 2026-04-12 — v1.1 scope narrowed to classroom → sets → run funnel*

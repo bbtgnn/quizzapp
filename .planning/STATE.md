@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Quiz show UI
 status: idle
-stopped_at: Milestone v1.1 — roadmap defined; start Phase 6 (design foundation).
+stopped_at: Milestone v1.1 — funnel-only scope (classroom → sets → run); start Phase 6.
 last_updated: "2026-04-12T22:00:00.000Z"
 last_activity: 2026-04-12
 progress:
@@ -22,7 +22,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-12)
 
 **Core value:** Teachers can run fair, understandable live quizzes where each drawn item is one clear unit—possibly several steps—without a separate chain-question concept complicating the model, import format, or session logic.
 
-**Current focus:** **v1.1 Quiz show UI** — full visual restyle (bold palette, big buttons, motion); see `ROADMAP.md` Phase 6.
+**Current focus:** **v1.1 Quiz show UI** — restyle **main path** only (`/`, question-set pick, `sessions/new`, live run); management UI stays plain. See `ROADMAP.md` Phase 6.
 
 ## Current Position
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 
 - v1.1 scope is **presentation-only**; SessionEngine contracts from v1.0 stay authoritative for run behavior.
 - Prefer **shared tokens and components** over per-route one-offs.
+- **Quiz-show styling** applies to **funnel + run** only; **management routes** stay simple for v1.1.
 
 ### Pending todos
 
