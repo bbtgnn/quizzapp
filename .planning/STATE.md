@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Quiz show UI
 status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-04-12T20:05:27.810Z"
+stopped_at: Phase 6 execution complete — ready for Phase 7
+last_updated: "2026-04-12T20:10:00.000Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_plans: 0
+  completed_plans: 0
+  percent: 20
 ---
 
 # Project State
@@ -22,25 +22,25 @@ See: `.planning/PROJECT.md` (updated 2026-04-12)
 
 **Core value:** Teachers can run fair, understandable live quizzes where each drawn item is one clear unit—possibly several steps—without a separate chain-question concept complicating the model, import format, or session logic.
 
-**Current focus:** Phase 06 — design-foundation-ui-primitives
+**Current focus:** Phase 7 — funnel shell & classroom selection
 
 ## Current Position
 
-Phase: 7
+Phase: 7 — funnel-shell-&-classroom-selection
 
 Plan: Not started
 
-Status: Executing Phase 06
+Status: Phase 6 complete; ready to discuss or plan Phase 7
 
 Last activity: 2026-04-12
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3 (milestone reset)
+- Total plans completed this milestone: 3 (Phase 6)
 - Average duration: —
 - Total execution time: —
 
@@ -48,7 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 06 | 3 | - | - |
+| 06 | 3 | done | - |
 | 07 | 0 | TBD | - |
 | 08 | 0 | TBD | - |
 | 09 | 0 | TBD | - |
@@ -74,8 +74,8 @@ None yet.
 
 ## Session continuity
 
-Last session: 2026-04-12T19:45:57.936Z
+Last session: 2026-04-12
 
-Stopped at: Phase 6 UI-SPEC approved
+Stopped at: Phase 6 complete — verification passed
 
-Resume file: .planning/phases/06-design-foundation-ui-primitives/06-UI-SPEC.md
+Next: `.planning/phases/07-funnel-shell-&-classroom-selection/` (when created) or `/gsd-discuss-phase 7`

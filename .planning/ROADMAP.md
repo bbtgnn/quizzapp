@@ -13,7 +13,7 @@
 
 ## Phases
 
-- [ ] **Phase 6: Design foundation & UI primitives** — **TOK-01, CMP-01**: Tailwind/theme tokens, typography scale, primary/secondary buttons, panels/cards for reuse on funnel + run.
+- [x] **Phase 6: Design foundation & UI primitives** — **TOK-01, CMP-01**: Tailwind/theme tokens, typography scale, primary/secondary buttons, panels/cards for reuse on funnel + run. *(2026-04-12)*
 - [ ] **Phase 7: Funnel shell & classroom selection** — **SHL-01, FUN-01**: Framing for in-scope routes; quiz-show **`/`** (classroom list / pick teaching context).
 - [ ] **Phase 8: Question set selection** — **FUN-02**: **`/sessions/new`** and **`/question-sets`** list; import route stays baseline.
 - [ ] **Phase 9: Live session run** — **RUN-01**: **`/sessions/[id]/run`** — big staging, oversized answer controls, engine-true k-of-n/stem.
